@@ -917,11 +917,11 @@ def SeatedForwardBendRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             node_x,_,_ = getLandmarks(point3d[AngleNodeDef.LEFT_FOOT_INDEX])
             left_shoulder_x,_,_ = getLandmarks(point3d[AngleNodeDef.LEFT_SHOULDER])
             right_shoulder_x,_,_ = getLandmarks(point3d[AngleNodeDef.RIGHT_SHOULDER])
-            if node_x>left_shoulder_x and node_x>right_shoulder_x:
+            if node_x<left_shoulder_x and node_x<right_shoulder_x:
                 roi[key] = True
                 side = "LEFT"
                 imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
-            elif node_x<left_shoulder_x and node_x<right_shoulder_x:
+            elif node_x>left_shoulder_x and node_x>right_shoulder_x:
                 roi[key] = True
                 side = "RIGHT"
                 imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
@@ -936,10 +936,14 @@ def SeatedForwardBendRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             right_knee_x,_,_ = getLandmarks(point3d[AngleNodeDef.RIGHT_KNEE])
             right_wrist_x,_,_ = getLandmarks(point3d[AngleNodeDef.RIGHT_WRIST])
             print('right_wrist_x', right_wrist_x,'left_wrist_x', left_wrist_x)
-            if left_knee_x>left_wrist_x and right_knee_x >right_wrist_x and angle_dict[key]>=90:
+            if side=="RIGHT" and left_knee_x>left_wrist_x and right_knee_x >right_wrist_x and angle_dict[key]>=90:
                 roi["LEFT_SHOULDER"] = True
                 roi["RIGHT_SHOULDER"] = True
                 imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
+            elif side=="LEFT" and left_knee_x<left_wrist_x and right_knee_x < right_wrist_x and angle_dict[key]>=90:
+                            roi["LEFT_SHOULDER"] = True
+                            roi["RIGHT_SHOULDER"] = True
+                            imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
             else:
                 roi["LEFT_SHOULDER"] = False
                 roi["RIGHT_SHOULDER"] = False
