@@ -20,7 +20,7 @@ class YogaPose:
         roi = {}
         angle_def = None
         jsonfile_path = ""
-        
+
         if type == 'Tree Style':
             roi = {
                 'LEFT_KNEE': False,
@@ -161,7 +161,7 @@ class YogaPose:
                 'RIGHT_FOOT_INDEX':False,
                 'LEFT_FOOT_INDEX':False,
             }
-            angle_def = AngleNodeDef.SEATEDFORWARDBEND_ANGLE 
+            angle_def = AngleNodeDef.SEATEDFORWARDBEND_ANGLE
             jsonfile_path = f"JsonFile/SeatedForwardBendPose/sample.json"
         elif type == "Bridge pose":
             roi = {
@@ -204,27 +204,23 @@ class YogaPose:
             }
             angle_def = AngleNodeDef.PYRAMID_ANGLE 
             jsonfile_path = f"JsonFile/PyramidPose/sample.json"
-
         return roi, angle_def, jsonfile_path
-    
     def initialAngleDict(self, dict={}):
         index = 0
         for key,_ in self.angle_def.items():
             dict[key] = 0
             index+=1
         return dict
-    
+
     def initialDetect(self):
         self.sample_angle_dict = toolkit.readSampleJsonFile(self.jsonfile_path)
         if self.sample_angle_dict == None:
             #return self.initialAngleDict()
             self.sample_angle_dict = toolkit.readSampleJsonFile(self.jsonfile_path)
         #return self.sample_angle_dict
-        
-    
-        
+
     def detect(self, point, rect , center):
-        
+
         self.tips = ""
         point3d = []
 
@@ -235,8 +231,8 @@ class YogaPose:
             for j in range(3):
                 ang.append(point.get(i).get(j))
             point3d.append(ang)
-            
-        
+
+
 
         if(self.type == 'Tree Style'):
             for key,value in self.angle_def.items():
@@ -291,7 +287,7 @@ class YogaPose:
             self.roi, self.tips, self.imagePath = toolkit.PyramidRule(self.roi, self.tips, self.sample_angle_dict, self.angle_dict, point3d)
 
         return [self.tips, self.imagePath]
-    
+
 
 
 

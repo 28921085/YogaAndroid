@@ -23,8 +23,8 @@ class MainActivity : AppCompatActivity() {
         start.setOnClickListener {
             // 頁面跳轉
             // val intent = Intent(this, CalibrationStage::class.java)
-            //val intent = Intent(this, BluetoothActivity::class.java)
-            val intent = Intent(this, Menu::class.java)
+            val intent = Intent(this, BluetoothActivity::class.java)
+            //val intent = Intent(this, Menu::class.java)
             startActivity(intent)
         }
 
