@@ -11,10 +11,11 @@ class YogaPose:
         self.type = type
         self.tips = ""
         self.roi, self.angle_def, self.jsonfile_path = self.initialize(type)
-        self.angle_dict = {}
-        self.sample_angle_dict = self.initialAngleDict()
-        self.imagePath = ""#"./data/image/WarriorIIRulePic/8.JPG" # temporary use to demo, skip it
-        
+        self.angle_dict = self.initialAngleDict()
+        self.sample_angle_dict = {}#initialAngleDict
+        self.imagePath = ""# temporary use to demo, skip it
+        self.initialDetect()
+
     def initialize(self, type):
         roi = {}
         angle_def = None
@@ -35,7 +36,7 @@ class YogaPose:
                 'RIGHT_INDEX': False,
             }
             angle_def = AngleNodeDef.TREE_ANGLE
-            jsonfile_path = f".\JsonFile\TreePose\sample.json"
+            jsonfile_path = f"JsonFile/TreePose/sample.json"
         elif type == 'Warrior2 Style':
             roi = {
                 'RIGHT_ANKLE': False,
@@ -50,7 +51,7 @@ class YogaPose:
                 'RIGHT_ELBOW': False
             }
             angle_def = AngleNodeDef.WARRIOR_II_ANGLE
-            jsonfile_path = f"./JsonFile/WarriorIIPose/sample.json"
+            jsonfile_path = f"JsonFile/WarriorIIPose/sample.json"
 
         elif type == 'Reverse Plank':
             roi = {
@@ -69,7 +70,7 @@ class YogaPose:
                 'RIGHT_KNEE': False
             }
             angle_def = AngleNodeDef.REVERSE_PLANK_ANGLE
-            jsonfile_path = f"./JsonFile/ReversePlankPose/sample.json"
+            jsonfile_path = f"JsonFile/ReversePlankPose/sample.json"
         elif type == "Plank":
             roi = {
                 'NOSE': False,
@@ -85,7 +86,7 @@ class YogaPose:
                 'RIGHT_ANKLE': False,
             }
             angle_def = AngleNodeDef.PLANK_ANGLE
-            jsonfile_path = f"./JsonFile/PlankPose/sample_v3.json"
+            jsonfile_path = f"JsonFile/PlankPose/sample_v3.json"
         elif type == "Child's pose":
             roi = {
                 'NOSE': False,
@@ -103,7 +104,7 @@ class YogaPose:
                 'RIGHT_ANKLE': False,
             }
             angle_def = AngleNodeDef.CHILDS_ANGLE
-            jsonfile_path = f"./JsonFile/ChildsPose/sample.json"
+            jsonfile_path = f"JsonFile/ChildsPose/sample.json"
         elif type == "Downward dog":
             roi = {
                 'NOSE': False,
@@ -123,7 +124,7 @@ class YogaPose:
                 'RIGHT_HEEL': False,
             }
             angle_def = AngleNodeDef.DOWNWARDDOG_ANGLE 
-            jsonfile_path = f"./JsonFile/DownwardDogPose/sample.json"
+            jsonfile_path = f"JsonFile/DownwardDogPose/sample.json"
         elif type == "Low Lunge":
             roi = {
                 'NOSE': False,
@@ -141,7 +142,7 @@ class YogaPose:
                 'LEFT_ANKLE':False,
             }
             angle_def = AngleNodeDef.LOWLUNGE_ANGLE 
-            jsonfile_path = f"./JsonFile/LowLungePose/sample.json"
+            jsonfile_path = f"JsonFile/LowLungePose/sample.json"
         elif type == "Seated Forward Bend":
             roi = {
                 'NOSE': False,
@@ -161,7 +162,7 @@ class YogaPose:
                 'LEFT_FOOT_INDEX':False,
             }
             angle_def = AngleNodeDef.SEATEDFORWARDBEND_ANGLE 
-            jsonfile_path = f"./JsonFile/SeatedForwardBendPose/sample.json"
+            jsonfile_path = f"JsonFile/SeatedForwardBendPose/sample.json"
         elif type == "Bridge pose":
             roi = {
                 'NOSE': False,
@@ -181,7 +182,7 @@ class YogaPose:
                 'LEFT_FOOT_INDEX':False,
             }
             angle_def = AngleNodeDef.BRIDGE_ANGLE 
-            jsonfile_path = f"./JsonFile/BridgePose/sample.json"
+            jsonfile_path = f"JsonFile/BridgePose/sample.json"
         elif type == "Pyramid pose":
             roi = {
                 'NOSE': False,
@@ -202,7 +203,7 @@ class YogaPose:
                 'LEG': False,
             }
             angle_def = AngleNodeDef.PYRAMID_ANGLE 
-            jsonfile_path = f"./JsonFile/PyramidPose/sample.json"
+            jsonfile_path = f"JsonFile/PyramidPose/sample.json"
 
         return roi, angle_def, jsonfile_path
     
@@ -216,7 +217,9 @@ class YogaPose:
     def initialDetect(self):
         self.sample_angle_dict = toolkit.readSampleJsonFile(self.jsonfile_path)
         if self.sample_angle_dict == None:
+            #return self.initialAngleDict()
             self.sample_angle_dict = toolkit.readSampleJsonFile(self.jsonfile_path)
+        #return self.sample_angle_dict
         
     
         
