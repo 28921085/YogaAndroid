@@ -62,6 +62,7 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener, 
     private lateinit var python : Python
     private lateinit var pose     : PyObject
     private lateinit var heatmappy : PyObject
+    private lateinit var yogamatProcessor : PyObject
     //文字轉語音
     private lateinit var textToSpeech: TextToSpeech
     //判別文字是否更動用
@@ -275,6 +276,10 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener, 
         pose = python.getModule("yogaPoseDetect" ).callAttr("YogaPose",poseName)
 
         heatmappy = python.getModule("heatmap")
+
+        yogamatProcessor = python.getModule("YogaMatProcessor").callAttr("YogaMatProcessor", 1920, 1080)
+
+        // drawYogaMat = python.getModule("draw_yoga_mat").callAttr("ImageProcessor", 1920, 1080)
 
         yogamainBinding.title.text = poseName
 
@@ -556,13 +561,26 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener, 
                                 }
                             }
 
+                val point2d: List<MutableList<Float>> =
+                    resultBundle.results.first().landmarks().flatMap { nlandmarks ->
+                        nlandmarks.map { landmark ->
+                            mutableListOf(landmark.x(), landmark.y())
+                        }
+                    }
 
-                        var guideStr = pose.callAttr(
-                                "detect", floatListList, heatmappy.callAttr("get_rects"),
-                                heatmappy.callAttr("get_center")
-                        ).toString()
+                        println("norfloatListList: ${point2d}")
 
+                        println("floatListList: ${floatListList}")
+                        var centor = heatmappy.callAttr("get_center")
+                        println("get_center ${centor}" )
 
+                        var feet_data = yogamatProcessor.callAttr("get_feet_data", point2d, floatListList, heatmappy.callAttr("get_center"))
+//                println("feet_data ${feet_data}")
+
+                        var guideStr = pose.callAttr("detect", floatListList , heatmappy.callAttr("get_rects") ,
+                                heatmappy.callAttr("get_center"), feet_data).toString()
+
+                        
                         if (guideStr.iterator().hasNext()) {
                             val re = guideStr.split(',')
                             val re_0 = re[0].length

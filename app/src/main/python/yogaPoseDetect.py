@@ -3,6 +3,8 @@ import AngleNodeDef
 import toolkit
 import numpy as np
 from yogamat import get_mat_data
+from FeetData import FeetData
+
 class YogaPose:
     '''
     type: WarriorII, Tree, ReversePlank, Plank ...etc
@@ -219,12 +221,24 @@ class YogaPose:
             self.sample_angle_dict = toolkit.readSampleJsonFile(self.jsonfile_path)
         #return self.sample_angle_dict
 
-    def detect(self, point, rect , center):
+    def detect(self, point, rect , center, feet_data_json):
 
         self.tips = ""
         point3d = []
 
+        print("feet in detect json", feet_data_json)
+        feet_data = FeetData.from_dict(feet_data_json)
+        print("feet in detect", feet_data)
         mat = get_mat_data(rect , center)
+
+        feet_data.center = [432, 222]
+
+
+        feet_count = feet_data.get_non_empty_feet_count()
+        print("feet : 非空腳的數量:", feet_count)
+
+        closer_foot = feet_data.get_closer_foot_to_center()
+        print("feet : 靠近重心的腳:", closer_foot)
 
         for i in range(point.size()):
             ang = []
