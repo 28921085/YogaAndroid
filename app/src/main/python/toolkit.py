@@ -84,7 +84,7 @@ def computeAngle(point1, centerPoint, point2):
     B = m.degrees(m.acos(cos_b))
     return B
 
-def treePoseRule(roi, tips, sample_angle_dict, angle_dict, point3d, mat):
+def treePoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
     """tree pose rule
 
     Args:
