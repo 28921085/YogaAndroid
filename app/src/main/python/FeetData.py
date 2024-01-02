@@ -1,15 +1,21 @@
 
 import numpy as np
 
+# !!!!!!! 請注意以下的 TODO
 class FeetData:
     def __init__(self, left_foot, right_foot, center_of_gravity=None):
         # 將 int64 轉換為 int
-        self.left_foot = self.convert_to_int(left_foot)
-        self.right_foot = self.convert_to_int(right_foot)
+        # TODO : 由於目前 輸入的 MediaPipe 座標左右相反， 先階段決定先維持現狀，因此在 FeetData 中將左右腳設定相反
+        self.left_foot = self.convert_to_int(right_foot)
+        self.right_foot = self.convert_to_int(left_foot)
         if not center_of_gravity:
             self.center_of_gravity = [0, 0]
         else:
             self.center_of_gravity = self.convert_to_int(center_of_gravity)
+
+    def build(self, data):
+        self.left_foot = data["left_foot"]
+        self.right_foot = data["right_foot"]
 
     @staticmethod
     def convert_to_int(value):
@@ -47,9 +53,6 @@ class FeetData:
         # 將 FeetData 物件轉換為字典
         return {"left_foot": self.left_foot, "right_foot": self.right_foot, "center_of_gravity": self.center_of_gravity}
 
-    def build(self, data):
-        self.left_foot = data["left_foot"]
-        self.right_foot = data["right_foot"]
 
     @classmethod
     def from_dict(cls, data):

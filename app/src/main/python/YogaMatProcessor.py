@@ -146,10 +146,10 @@ class YogaMatProcessor:
             # print("raise_feet_dict", raise_feet_dict)
             print("feet_points_dict", feet_points_dict)
 
-            for key, feet_on_mat in raise_feet_dict.items():
-                # 如果抬腳，較刪除該點
-                if not feet_on_mat:
-                    feet_points_dict[key] = (float("inf"), float("inf"))
+#             for key, feet_on_mat in raise_feet_dict.items():
+#                 # 如果抬腳，較刪除該點
+#                 if not feet_on_mat:
+#                     feet_points_dict[key] = (float("inf"), float("inf"))
 
             return feet_points_dict
         else:
