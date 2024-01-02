@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 from PIL import Image
 
-
 # 將 A 圖片覆蓋到 B 圖片
 def overlay_image(background, overlay, position_x, position_y):
     # Convert the images to RGBA mode
@@ -89,12 +88,13 @@ class YogaMatProcessor:
         # 鏡頭的長寬
         self.w = w
         self.h = h
-        self.camera_flat_points = np.array([[w, h], [0, h], [0, 0], [w, 0]], dtype=np.float32)
+        # 鏡頭的長寬
+        self.camera_flat_points = np.array([[1, 1], [0, 1], [0, 0], [1, 0]], dtype=np.float32)
         # 預設瑜珈墊在鏡頭的座標
-        default_mat_point = np.array([[0.8 * w, 0.97 * h],
-                                      [0.2 * w, 0.97 * h],
-                                      [0.25 * w, 0.76 * h],
-                                      [0.75 * w, 0.76 * h]], dtype=np.float32)
+        default_mat_point = np.array([[0.8 , 0.97 ],
+                                      [0.2 , 0.97 ],
+                                      [0.25 , 0.76 ],
+                                      [0.75 , 0.76 ]], dtype=np.float32)
 
         print(default_mat_point)
         # 轉換矩陣
@@ -120,8 +120,6 @@ class YogaMatProcessor:
                 ang.append(r_point2d.get(i).get(j))
             point2d.append(ang)
 
-        print("n_point2d", point2d)
-
         feet_dict = self.get_feet_points_on_mat(point2d, point3d)
         print("feet_dict", feet_dict)
 
@@ -137,6 +135,8 @@ class YogaMatProcessor:
             feet_points = self.get_feet_points(point2d)
             transform_points = self.transform_point(feet_points)
             raise_feet_dict = check_raise_feet(point3d)
+            print("feet_points", feet_points)
+            print("feet transform_points", transform_points)
 
             feet_points_dict = {
                 AngleNodeDef.LEFT_HEEL: (transform_points[0][0], transform_points[0][1]),
@@ -144,16 +144,17 @@ class YogaMatProcessor:
             }
 
             # print("raise_feet_dict", raise_feet_dict)
-            # print("feet_points_dict", feet_points_dict)
+            print("feet_points_dict", feet_points_dict)
 
             for key, feet_on_mat in raise_feet_dict.items():
                 # 如果抬腳，較刪除該點
                 if not feet_on_mat:
-                    feet_points_dict[key] = None
+                    feet_points_dict[key] = (float("inf"), float("inf"))
 
             return feet_points_dict
         else:
-            return {}
+            return {AngleNodeDef.LEFT_HEEL: (float("inf"), float("inf")),
+                                    AngleNodeDef.RIGHT_HEEL: (float("inf"), float("inf"))}
 
     # 偵測場景中的瑜珈墊，製作轉換矩陣
     def generate_transform_matrix(self, image):
@@ -178,30 +179,14 @@ class YogaMatProcessor:
         transformed_points = [cv2.perspectiveTransform(np.array([np.float32([p])]), self.transform_matrix)[0][0] for p
                               in input_points]
 
-        # 將座標四捨五入到最接近的整數
-        transformed_points = np.round(transformed_points).astype(int)
-
         return transformed_points
-
-
-
 
 
     # 從 MediaPipe 的點中，取得在鏡頭中腳的點
     def get_feet_points(self, point2d):
         if not isinstance(point2d, int):
-            return [[point2d[0][0] * self.w, point2d[0][1] * self.h],
-            [point2d[1][0] * self.w, point2d[1][1] * self.h]]
+            print("feet get_feet_points L: " + str(point2d[AngleNodeDef.LEFT_HEEL]) + "R:" + str(point2d[AngleNodeDef.RIGHT_HEEL]))
+            return [[point2d[AngleNodeDef.LEFT_HEEL][0] , point2d[AngleNodeDef.LEFT_HEEL][1] ],
+            [point2d[AngleNodeDef.RIGHT_HEEL][0] , point2d[AngleNodeDef.RIGHT_HEEL][1] ]]
         else:
             return []
-
-    # 畫出有腳的瑜珈墊
-    def draw_yoga_mat_result(self, transformed_points, feet_images):
-        green_image = np.full((self.h, self.w, 3), [100, 255, 0], dtype=np.uint8)
-
-        for key, value in transformed_points.items():
-            if value is not None:
-                arr = np.array(value)
-                green_image = overlay_image(green_image, feet_images[key], arr[0], arr[1])
-
-        return green_image

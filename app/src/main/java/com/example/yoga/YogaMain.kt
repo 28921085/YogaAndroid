@@ -63,6 +63,8 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener, 
     private lateinit var pose     : PyObject
     private lateinit var heatmappy : PyObject
     private lateinit var yogamatProcessor : PyObject
+    private lateinit var feetData : PyObject
+
     //文字轉語音
     private lateinit var textToSpeech: TextToSpeech
     //判別文字是否更動用
@@ -278,6 +280,7 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener, 
         heatmappy = python.getModule("heatmap")
 
         yogamatProcessor = python.getModule("YogaMatProcessor").callAttr("YogaMatProcessor", 1920, 1080)
+        feetData = python.getModule("FeetData").callAttr("FeetData", null, null)
 
         // drawYogaMat = python.getModule("draw_yoga_mat").callAttr("ImageProcessor", 1920, 1080)
 
@@ -568,14 +571,17 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener, 
                         }
                     }
 
-                        println("norfloatListList: ${point2d}")
-
-                        println("floatListList: ${floatListList}")
-                        var centor = heatmappy.callAttr("get_center")
-                        println("get_center ${centor}" )
-
                         var feet_data = yogamatProcessor.callAttr("get_feet_data", point2d, floatListList, heatmappy.callAttr("get_center"))
-//                println("feet_data ${feet_data}")
+
+                        feetData.callAttr("build", feet_data)
+
+                        var left_x = feetData.callAttr("get_left_foot_x").toFloat()
+                        var left_y = feetData.callAttr("get_left_foot_y").toFloat()
+                        var right_x = feetData.callAttr("get_right_foot_x").toFloat()
+                        var right_y = feetData.callAttr("get_right_foot_y").toFloat()
+
+                        yogamainBinding.yogaMat.setLeftFeetPosition(left_x, left_y);
+                        yogamainBinding.yogaMat.setRightFeetPosition(right_x,right_y);
 
                         var guideStr = pose.callAttr("detect", floatListList , heatmappy.callAttr("get_rects") ,
                                 heatmappy.callAttr("get_center"), feet_data).toString()
