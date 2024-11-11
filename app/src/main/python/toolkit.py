@@ -512,7 +512,7 @@ def plankPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             elif tip_flag == True:
                 tips = "請將頭抬起，保持頸椎平行於地面"
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_EYE] if key=='LEFT_EYE' else point3d[AngleNodeDef.RIGHT_EYE]
-                pointsOut=[pointStart_x, pointStart_y,pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE] if tip_flag else pointsOuth
+                pointsOut=[pointStart_x, pointStart_y,pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
         elif key == side + 'ELBOW':
             if side == 'RIGHT_':
@@ -1138,7 +1138,7 @@ def LowLungeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             if hip_y<=knee_y:
                 roi[f"{side}_HIP"] = True
                 roi[f"{side_back}_HIP"] = True
-                pointsOut=[] if tip_flag else pointsOu
+                pointsOut=[] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
             else:
                 roi[f"{side}_HIP"] = False
