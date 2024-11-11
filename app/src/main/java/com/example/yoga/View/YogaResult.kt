@@ -15,16 +15,15 @@ import kotlinx.coroutines.launch
 class YogaResult : AppCompatActivity() {
     private lateinit var yogaResultBinding: ActivityYogaResultBinding
     private var global=GlobalVariable.getInstance()
-    private lateinit var python : Python
-    private lateinit var heatmapReturn : PyObject
-    private var myThread: Thread? = null
-    fun lastpage(){
 
-        try {
-            myThread?.interrupt()
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
+    // yogaMat nextPage
+    private lateinit var python : Python
+    private lateinit var yogaMat : PyObject
+    private var yogaMatThread : Thread? = null
+    private var threadFlag : Boolean = true
+
+    fun lastpage(){
+        threadFlag = false // to stop thread
 
         val intent = Intent(this, AllPoseMenu::class.java)
         startActivity(intent)
@@ -37,30 +36,33 @@ class YogaResult : AppCompatActivity() {
         yogaResultBinding = ActivityYogaResultBinding.inflate(layoutInflater)
         setContentView(yogaResultBinding.root)
 
-        //啟動python
+        // python start
         if (!Python.isStarted()) {
             Python.start(AndroidPlatform(this))
         }
         python = Python.getInstance()
 
-        heatmapReturn = python.getModule("heatmap")
+        // get yogaMat python module
+        yogaMat = python.getModule("heatmap")
 
-        // yogamap return
-        myThread = Thread {
+        // using yogaMat nextPage
+        yogaMatThread = Thread {
             try {
-                while (!heatmapReturn.callAttr("checkReturn").toBoolean()) {
+                while (!yogaMat.callAttr("checkReturn").toBoolean() and threadFlag) {
                     Thread.sleep(100)
-                    print("checkReturn")
                 }
-                runOnUiThread {
-                    lastpage()
+                if(threadFlag){
+                    runOnUiThread {
+                        lastpage()
+                    }
                 }
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
+            println("!!! YogaResult Done !!!")
         }
 
-        myThread?.start()
+        yogaMatThread?.start()
 
 
         val title = intent.getStringExtra("title")
@@ -85,8 +87,6 @@ class YogaResult : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         global.backgroundMusic.pause()
-        // 在Activity銷毀時結束thread
-        myThread?.interrupt()
     }
     override fun onPause() {
         super.onPause()
