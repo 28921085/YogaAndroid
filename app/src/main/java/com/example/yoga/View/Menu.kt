@@ -68,6 +68,7 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
     // for判斷左滑/右滑 紀錄手心底的x點位
     private var previousWristX: Float? = null
     private var firstWristX: Float? = null
+    // 讓上下左右不會一直執行，執行完才會換下一個
     private var isExecuting = false
 
     // 手部偵測status描述
@@ -439,30 +440,73 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
 
         //成功偵測到手部點位
         if(wholeFingerLandmark != null){
-            val indexTIP = wholeFingerLandmark.get(8).y()
-            val indexDIP = wholeFingerLandmark.get(7).y()
-            val middleTIP = wholeFingerLandmark.get(12).y()
-            val middleDIP = wholeFingerLandmark.get(11).y()
-            val ringTIP = wholeFingerLandmark.get(16).y()
-            val ringDIP = wholeFingerLandmark.get(15).y()
-            val pinkyTIP = wholeFingerLandmark.get(20).y()
-            val pinkyDIP = wholeFingerLandmark.get(19).y()
+            val wrist = wholeFingerLandmark.get(0)
+            val thumbTIP = wholeFingerLandmark.get(4)
+            val indexTIP = wholeFingerLandmark.get(8)
+            val indexDIP = wholeFingerLandmark.get(7)
+            val middleTIP = wholeFingerLandmark.get(12)
+            val middleDIP = wholeFingerLandmark.get(11)
+            val ringTIP = wholeFingerLandmark.get(16)
+            val ringDIP = wholeFingerLandmark.get(15)
+            val pinkyTIP = wholeFingerLandmark.get(20)
+            val pinkyDIP = wholeFingerLandmark.get(19)
 
-            if(indexTIP < indexDIP &&
-                middleTIP < middleDIP &&
-                ringTIP < ringDIP &&
-                pinkyTIP < pinkyDIP) {
-                handleSwipePoseDetection(resultBundle)
+            if( indexTIP.x() < indexDIP.x() && // 454~457: 確認四隻手指皆為伸直狀態
+                middleTIP.x() < middleDIP.x() &&
+                ringTIP.x() < ringDIP.x() &&
+                pinkyTIP.x() < pinkyDIP.x() &&
+                indexTIP.x() < wrist.x() && // 458~461: 四隻手指皆指向右側
+                middleTIP.x() < wrist.x() &&
+                ringTIP.x() < wrist.x() &&
+                pinkyTIP.x() < wrist.x() &&
+                thumbTIP.y() < wrist.y() && // 462~466: 五隻手指皆位於手腕點位上方
+                indexTIP.y() < wrist.y() &&
+                middleTIP.y() < wrist.y() &&
+                ringTIP.y() < wrist.y() &&
+                pinkyTIP.y() < wrist.y() &&
+                thumbTIP.y() < indexTIP.y() // 467: 拇指的點位y離上方的距離較近，食指距離較遠
+                ) {
+                lifecycleScope.launch {
+                    delay(1000)
+                    menuBinding.angleShow.text = "上一頁"
+                    if(threadFlag){
+                        runOnUiThread {
+                            lastpage()
+                        }
+                    }
+                }
             }
-            else {
+            else if(indexTIP.x() > indexDIP.x() && // 479～482: 確認四隻手指皆為伸直狀態
+                    middleTIP.x() > middleDIP.x() &&
+                    ringTIP.x() > ringDIP.x() &&
+                    pinkyTIP.x() > pinkyDIP.x() &&
+                    indexTIP.x() > wrist.x() && // 483~486: 四隻手指皆指向右側
+                    middleTIP.x() > wrist.x() &&
+                    ringTIP.x() > wrist.x() &&
+                    pinkyTIP.x() > wrist.x() &&
+                    thumbTIP.y() < wrist.y() && // 487~491: 五隻手指皆位於手腕點位上方
+                    indexTIP.y() < wrist.y() &&
+                    middleTIP.y() < wrist.y() &&
+                    ringTIP.y() < wrist.y() &&
+                    pinkyTIP.y() < wrist.y() &&
+                    thumbTIP.y() < indexTIP.y() // 492: 拇指的點位y離上方的距離較近，食指距離較遠
+                ){
+                lifecycleScope.launch {
+                    delay(1000)
+                    menuBinding.angleShow.text = "下一頁"
+                    if(threadFlag){
+                        runOnUiThread {
+                            nextpage(currentSelect.text.toString())
+                        }
+                    }
+                }
+            }else {
                 handlePointingDirection(resultBundle)
             }
         }
         else {
             "no hand detected on the screen".also { menuBinding.angleShow.text = it }
         }
-
-
     }
 
     private fun handleSwipePoseDetection(resultBundle: HandLandmarkerHelper.ResultBundle) {
@@ -470,6 +514,7 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
 
         if (wristLandmark != null) {
             val currentWristX = wristLandmark.x()
+
             // 當手第一次在鏡頭裡被偵測到，紀錄下它的點位
             if (firstWristX == null) {
                 firstWristX = currentWristX
@@ -478,7 +523,7 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
             firstWristX?.let { initialWristX ->
                 previousWristX?.let { prevX ->
                     Log.d("value", "Value: $currentWristX and $prevX")
-                    if (currentWristX > initialWristX + 0.3) {
+                    if (currentWristX > initialWristX + 0.2) {
                         Log.d("SwipeDetection", "Swiping right")
                         menuBinding.angleShow.text = "右滑"
                         if(threadFlag){
@@ -486,7 +531,7 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
                                 nextpage(currentSelect.text.toString())
                             }
                         }
-                    } else if (currentWristX < initialWristX - 0.3) {
+                    } else if (currentWristX < initialWristX - 0.2) {
                         Log.d("SwipeDetection", "Swiping left")
                         menuBinding.angleShow.text = "左滑"
                         if(threadFlag){
@@ -496,7 +541,7 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
                         }
                     } else {
                         Log.d("SwipeDetection", "Not Swiping")
-                        menuBinding.angleShow.text = "無偵測到滑動"
+                        firstWristX = currentWristX
                     }
                 }
                 previousWristX = currentWristX
