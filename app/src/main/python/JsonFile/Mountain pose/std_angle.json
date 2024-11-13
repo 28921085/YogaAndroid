@@ -1,12 +1,12 @@
 {
-    "LEFT_ELBOW": 4.5,
-    "RIGHT_ELBOW": 4.6,
-    "LEFT_SHOULDER": 1.7,
-    "RIGHT_SHOULDER": 1.3,
-    "LEFT_HIP": 5.3,
-    "RIGHT_HIP": 18.3,
-    "LEFT_KNEE": 9.9,
-    "RIGHT_KNEE": 13.9,
-    "LEFT_ANKLE": 10.1,
-    "RIGHT_ANKLE": 11.2
+    "LEFT_ELBOW": 19.3,
+    "RIGHT_ELBOW": 14.3,
+    "LEFT_SHOULDER": 4.2,
+    "RIGHT_SHOULDER": 3.1,
+    "LEFT_HIP": 9.5,
+    "RIGHT_HIP": 9.0,
+    "LEFT_KNEE": 9.3,
+    "RIGHT_KNEE": 7.6,
+    "LEFT_ANKLE": 11.0,
+    "RIGHT_ANKLE": 7.1
 }

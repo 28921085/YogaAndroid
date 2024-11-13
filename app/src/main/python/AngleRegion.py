@@ -176,6 +176,7 @@ LOCUST = {
 
 COBRA = {
    'LEFT_HIP': False,
+   'LEFT_KNEE': False,
    'LEFT_EAR': False,
    'LEFT_FOOT_INDEX': False,
    'RIGHT_FOOT_INDEX': False
