@@ -46,7 +46,7 @@ class TrainingMenu : AppCompatActivity() {
         "平衡與穩定練習" to arrayOf(
             "Locust pose",
             "Pigeon pose",
-            "Half Moon pose",
+            "Half moon pose",
             "Reverse Plank",
             "Pyramid pose",
             "Chair pose"

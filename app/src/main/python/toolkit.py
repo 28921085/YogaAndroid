@@ -461,19 +461,17 @@ def plankPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/10.jpg" if tip_flag else imagePath
                 break
         if key == side + 'ANKLE':
-            ankle_x, ankle_y, _, ankle_vi=point3d[AngleNodeDef.LEFT_ANKLE] if key=='LEFT_ANKLE' else point3d[AngleNodeDef.RIGHT_ANKLE]
-            foot_index_x, foot_index_y, _, foot_index_vi=point3d[AngleNodeDef.LEFT_FOOT_INDEX] if key=='LEFT_ANKLE' else point3d[AngleNodeDef.RIGHT_FOOT_INDEX]
-            if angle_dict[key] == -1 :
+            _, ankle_y, _, ankle_vi=point3d[AngleNodeDef.LEFT_ANKLE] if key=='LEFT_ANKLE' else point3d[AngleNodeDef.RIGHT_ANKLE]
+            _, foot_index_y, _, foot_index_vi=point3d[AngleNodeDef.LEFT_FOOT_INDEX] if key=='LEFT_ANKLE' else point3d[AngleNodeDef.RIGHT_FOOT_INDEX]
+            if ankle_vi <MIN_DETECT_VISIBILITY and foot_index_vi <MIN_DETECT_VISIBILITY :
                 continue
-            if angle_dict[key]>=min_angle:
-                roi['RIGHT_ANKLE'] = True
-                roi['LEFT_ANKLE'] = True
-                pointsOut = [] if tip_flag else pointsOut
+            if ankle_y < foot_index_y:
+                roi[key] = True
+                pointsOut=[] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/10.jpg" if tip_flag else imagePath
-            elif angle_dict[key] < min_angle and tip_flag == True:
-                roi['RIGHT_ANKLE'] = False
-                roi['LEFT_ANKLE'] = False
-                tips = "請用前腳掌將身體撐起"
+            else:
+                roi[key] = False
+                tips = "請用前腳掌將身體撐起" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.RIGHT_FOOT_INDEX] if key=='RIGHT_ANKLE' else point3d[AngleNodeDef.LEFT_FOOT_INDEX]
                 pointsOut = [pointStart_x, pointStart_y,pointStart_x,pointStart_y-DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/9.jpg" if tip_flag else imagePath
@@ -724,8 +722,8 @@ def reversePlankPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 tips = "請將手掌平貼於地面，讓肩膀、手軸、手腕成一直線垂直於地面" if tip_flag else tips
                 imagePath = f"{imageFolder}/2.jpg" if tip_flag else imagePath
         elif key == f"{side}_SHOULDER":
-            min_angle = 60
-            max_angle = 80
+            min_angle = 55
+            max_angle = 85
             if angle_dict[key] == -1 :
                continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -736,12 +734,12 @@ def reversePlankPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             else:
                 roi["LEFT_SHOULDER"] = False
                 roi["RIGHT_SHOULDER"] = False
-                tips = "將臀部抬起，胸往前挺，使脊椎保持一直線" if tip_flag else tips
+                tips = "胸往前挺並保持臀部抬起" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_HIP] if key=="LEFT_SHOULDER" else point3d[AngleNodeDef.RIGHT_HIP]
                 pointsOut=[pointStart_x, pointStart_y,pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/3.jpg" if tip_flag else imagePath
         elif key == f"{side}_HIP":
-            tolerance_val = 5
+            tolerance_val = 7
             min_angle = sample_angle_dict[key]-tolerance_val
             max_angle = sample_angle_dict[key]+tolerance_val
             if angle_dict[key] == -1 :
@@ -1135,7 +1133,7 @@ def LowLungeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 _,knee_y,_,knee_vi = point3d[AngleNodeDef.LEFT_KNEE]
             if hip_vi<MIN_DETECT_VISIBILITY or knee_vi<MIN_DETECT_VISIBILITY:
                 continue
-            if hip_y<=knee_y:
+            if hip_y>knee_y:
                 roi[f"{side}_HIP"] = True
                 roi[f"{side_back}_HIP"] = True
                 pointsOut=[] if tip_flag else pointsOut
@@ -1980,8 +1978,8 @@ def LocustPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'LEFT_ELBOW':
-            min_angle = 155
-            max_angle = 175
+            min_angle = 150
+            max_angle = 180
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2019,8 +2017,8 @@ def LocustPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'RIGHT_KNEE':
-            min_angle = 155
-            max_angle = 175
+            min_angle = 150
+            max_angle = 180
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2042,8 +2040,8 @@ def LocustPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'RIGHT_ELBOW':
-            min_angle = 155
-            max_angle = 175
+            min_angle = 150
+            max_angle = 180
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2060,7 +2058,7 @@ def LocustPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
         elif key == 'RIGHT_HIP':
             _,hip_y,_ ,hip_vi= point3d[AngleNodeDef.RIGHT_HIP]
             _,knee_y,_ ,knee_vi= point3d[AngleNodeDef.RIGHT_KNEE]
-            if hip_vi <MIN_DETECT_VISIBILITY and knee_vi < MIN_DETECT_VISIBILITY :
+            if hip_vi < MIN_DETECT_VISIBILITY and knee_vi < MIN_DETECT_VISIBILITY :
                 continue
             if hip_y > knee_y:
                 roi[key] = True
@@ -2144,6 +2142,35 @@ def CobraPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 tips = "請盡力將身體撐起並打直，勿駝背" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_SHOULDER]
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x - DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
+                imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
+        elif key == 'LEFT_KNEE':
+            _,hip_y,_,hip_vi = point3d[AngleNodeDef.LEFT_HIP]
+            _,knee_y,_,knee_vi = point3d[AngleNodeDef.LEFT_KNEE]
+            _,l_foot_index_y,_,l_foot_index_vi = point3d[AngleNodeDef.LEFT_FOOT_INDEX]
+            _,r_foot_index_y,_,r_foot_index_vi = point3d[AngleNodeDef.RIGHT_FOOT_INDEX]
+            if hip_vi <MIN_DETECT_VISIBILITY and knee_vi < MIN_DETECT_VISIBILITY :
+                continue
+            if abs(hip_y - knee_y)<=0.05:
+                if hip_y < r_foot_index_y and hip_y < l_foot_index_y:
+                    roi[key] = True
+                    pointsOut=[]
+                    imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
+                else:
+                    roi[key] = False
+                    pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_FOOT_INDEX]
+                    pointsOut = [pointStart_x, pointStart_y, pointStart_x, pointStart_y+DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
+                    print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.LEFT_FOOT_INDEX])
+                    pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.RIGHT_FOOT_INDEX]
+                    pointsOut = [pointStart_x, pointStart_y, pointStart_x, pointStart_y+DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
+                    print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.RIGHT_FOOT_INDEX])
+                    tips = "請將雙腳放至地面，勿抬起" if tip_flag else tips
+                    imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
+            else:
+                roi[key] = False
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_HIP]
+                pointsOut = [pointStart_x, pointStart_y, pointStart_x, pointStart_y+DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
+                print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.LEFT_HIP])
+                tips = "請將膝蓋與髖部放至地面，勿抬起" if tip_flag else tips
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
         elif key == 'LEFT_EAR':
             ear_x,_,_,ear_vi= point3d[AngleNodeDef.LEFT_EAR]
