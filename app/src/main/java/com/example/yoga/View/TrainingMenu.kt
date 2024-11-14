@@ -16,11 +16,17 @@ import com.example.yoga.databinding.ActivityTrainingMenuBinding
 
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.example.yoga.Model.GlobalVariable
 import com.example.yoga.ViewModel.TrainingMenuViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class TrainingMenu : AppCompatActivity() {
     private lateinit var trainingMenuBinding: ActivityTrainingMenuBinding
     private lateinit var recyclerView: RecyclerView
+    private var global = GlobalVariable.getInstance()
+
     private val mode = "TrainingProcess"
     private var menuTitle = ""
     private var totalScore = 0.0
@@ -129,5 +135,25 @@ class TrainingMenu : AppCompatActivity() {
         }
         startActivity(intent)
         finish()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch {
+            delay(800)
+            global.backgroundMusic.play()
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        global.backgroundMusic.pause()
+    }
+    override fun onResume() {
+        super.onResume()
+        global.backgroundMusic.play()
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        global.backgroundMusic.pause()
     }
 }

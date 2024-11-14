@@ -104,9 +104,10 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
     private val lock = Any()
 
     fun lastpage(){
-        if(mode == "ALlPose"){
-            threadFlag = false // to stop thread
+        Log.d("Main 訓練階段", "$mode")
+        threadFlag = false // to stop thread
 
+        if(mode == "AllPose"){
             timer30S.stopTimer()
             timerCurrent.handlerStop()
             val intent = Intent(this, AllPoseMenu::class.java)
@@ -120,14 +121,13 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
             startActivity(intent)
             finish()
         }
-
     }
     fun nextpage(){
-        Log.d("訓練模式", "$mode")
+        Log.d("Main 訓練模式", "$mode")
+        threadFlag = false // to stop thread
         if(mode == "AllPose"){
-            threadFlag = false // to stop thread
-
             val intent = Intent(this, YogaResult::class.java).apply {
+                putExtra("mode", mode)
                 putExtra("title" ,yogamainBinding.title.text)
                 putExtra("finishTime",timerCurrent.getTime())
                 putExtra("score",score)
@@ -163,6 +163,7 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
             else{
                 val intent = Intent(this, YogaResult::class.java).apply {
 //                    putExtra("title" ,yogamainBinding.title.text)
+                    putExtra("mode", mode)
                     putExtra("title" ,menuTitle)
                     putExtra("finishTime",totalTime)
                     putExtra("score",totalScore/poseList.size)
@@ -256,7 +257,10 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
 
         yogamainBinding.title.text = poseName
 
-        yogamainBinding.back.setOnClickListener { lastpage() }
+        yogamainBinding.back.setOnClickListener {
+            Log.d("YogaMain Debug", "點選返回按鈕")
+            lastpage()
+        }
 
         // 啟動分數計算器
         scoreCalculator = python.getModule("ScoreCalculator" ).callAttr("ScoreCalculator",poseName)

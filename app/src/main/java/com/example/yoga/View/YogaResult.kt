@@ -3,6 +3,7 @@ package com.example.yoga.View
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.lifecycleScope
 import com.chaquo.python.PyObject
 import com.chaquo.python.Python
@@ -22,12 +23,25 @@ class YogaResult : AppCompatActivity() {
     private var yogaMatThread : Thread? = null
     private var threadFlag : Boolean = true
 
+    private var mode = ""
+
     fun lastpage(){
         threadFlag = false // to stop thread
-
-        val intent = Intent(this, AllPoseMenu::class.java)
-        startActivity(intent)
-        finish()
+        if(mode == "AllPose"){
+            Log.d("訓練模式", "$mode")
+            val intent = Intent(this, AllPoseMenu::class.java)
+            startActivity(intent)
+            finish()
+        }
+        else if(mode == "TrainingProcess"){
+            Log.d("訓練模式", "$mode")
+            val intent = Intent(this, TrainingMenu::class.java)
+            startActivity(intent)
+            finish()
+        }
+        else{
+            Log.d("訓練模式", "$mode")
+        }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +85,8 @@ class YogaResult : AppCompatActivity() {
         yogaResultBinding.time.text = "完成時間:"+finishTime.toString()+"秒"
         val score = intent.getDoubleExtra("score",100.0)
         yogaResultBinding.score.text = "分數:${"%.2f".format(score)}"
+
+        mode = intent.getStringExtra("mode").toString()
 
         yogaResultBinding.back.text = "Back To Menu"
         yogaResultBinding.back.setOnClickListener {

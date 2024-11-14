@@ -39,6 +39,7 @@ class VideoGuide : AppCompatActivity() {
     private var fileGetter=fileNameGetter()
 
     fun nextpage(){
+        Log.d("Video 訓練模式: ", "$mode")
         try {
             threadFlag = false // to stop thread
         } catch (e: InterruptedException) {

@@ -15,7 +15,7 @@ import com.example.yoga.databinding.ActivityRestIntervalBinding
 
 class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
     private lateinit var restIntervalBinding: ActivityRestIntervalBinding
-    private var timer30S = KSecCountdownTimer(30) // 測試時設置為 5 秒
+    private var timer30S = KSecCountdownTimer(30)// 測試時設置為 5 秒
     var mode = ""
     var poseList = arrayOf<String>()
     var poseName=""
@@ -73,6 +73,9 @@ class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
 //        time = intent.getIntExtra("finishTime", 0)
         totalTime = intent.getDoubleExtra("totalTime", 0.0)
 
+        restIntervalBinding.skip.setOnClickListener {
+            onTimerFinished()
+        }
         timer30S.startTimer(this)
     }
 }

@@ -57,7 +57,6 @@ class AllPoseMenu : AppCompatActivity() {
 
     fun nextpage(posename: String) {
         threadFlag = false // to stop thread
-
         val intent = Intent(this, VideoGuide::class.java).apply {
             putExtra("mode", mode)
             putExtra("poseName", posename)
