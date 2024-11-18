@@ -29,11 +29,12 @@ class YogaPose:
     def initialDetect(self):
         self.sample_angle_dict = get_sample_angle_dict(self.type)
 
-    def detect(self, point, rect , center, feet_data_json):
+    def detect(self, point, point2, rect , center, feet_data_json):
         self.tips = ""
         self.pointsOut = []
         self.imagePath =  get_image_path(self.type)
-        point3d = []
+        point3d = [] # save landmarks
+        point3D = [] # save world landmarks
 
         feet_data = FeetData.from_dict(feet_data_json)
 
@@ -43,29 +44,34 @@ class YogaPose:
         closer_foot = feet_data.get_closer_foot_to_center(center)
         # print("feet : 靠近重心的腳:", closer_foot)
 
+        # landmarks
         for i in range(point.size()):
             ang = []
             for j in range(4):
                 ang.append(point.get(i).get(j))
             point3d.append(ang)
 
+        # world landmarks
+        for i in range(point2.size()):
+            ang = []
+            for j in range(4):
+                ang.append(point2.get(i).get(j))
+            point3D.append(ang)
+
         con = sum(1 for i in point3d if i[3] < toolkit.MIN_DETECT_VISIBILITY)
 
-        if(con>16):  #half of all node
+        if(con>24):  #half of all node
             self.tips="無法偵測到完整骨架"
             self.imagePath =  get_image_path(self.type)
             self.pointsOut=[]
             return [self.tips, self.imagePath, self.pointsOut]
         
-
+        # using world landmarks to calculate angles
         for key,value in self.angle_def.items():
-            if float(point3d[value[0]][3]) < toolkit.MIN_DETECT_VISIBILITY and float(point3d[value[1]][3]) <toolkit.MIN_DETECT_VISIBILITY and float(point3d[value[2]][3]) <toolkit.MIN_DETECT_VISIBILITY :
+            if float(point3D[value[0]][3]) < toolkit.MIN_DETECT_VISIBILITY and float(point3D[value[1]][3]) <toolkit.MIN_DETECT_VISIBILITY and float(point3D[value[2]][3]) <toolkit.MIN_DETECT_VISIBILITY :
                 self.angle_dict[key] = -1
             else:
-                if (self.type == 'Reverse Plank')  or (self.type == 'Plank') or (self.type == "Child's pose"):
-                    angle = toolkit.computeAngle(point3d[value[0]][:2], point3d[value[1]][:2], point3d[value[2]][:2])
-                else:
-                    angle = toolkit.computeAngle(point3d[value[0]], point3d[value[1]], point3d[value[2]])
+                angle = toolkit.computeAngle(point3D[value[0]], point3D[value[1]], point3D[value[2]])
                 self.angle_dict[key] = angle
 
         if(self.type == 'Tree Style'):

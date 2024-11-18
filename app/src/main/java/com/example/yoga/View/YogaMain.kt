@@ -469,8 +469,15 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
                     yogamainBinding.yogaMat.setLeftFeetPosition(left_x, left_y);
                     yogamainBinding.yogaMat.setRightFeetPosition(right_x,right_y);
 
+                    val floatListList3D: List<MutableList<Any>> =
+                        resultBundle.results.first().worldLandmarks().flatMap { landmarks ->
+                            landmarks.map { landmark ->
+                                mutableListOf(landmark.x(), landmark.y(), landmark.z(), landmark.visibility().orElse((-1.0).toFloat()).toFloat())
+                            }
+                        }
+
                     // Change pose tips
-                    val detectlist = pose.callAttr("detect", floatListList , heatmappy.callAttr("get_rects") , center, feet_data_str).asList()
+                    val detectlist = pose.callAttr("detect", floatListList , floatListList3D , heatmappy.callAttr("get_rects") , center, feet_data_str).asList()
 
                     ArrowList = detectlist[2].asList().map{it.toFloat()}
                     println("ArrowList: $ArrowList")

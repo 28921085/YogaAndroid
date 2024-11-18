@@ -230,16 +230,16 @@ def treePoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/8.jpg" if tip_flag else imagePath
             elif index_x<right_shoulder_x:
                 roi[key] = False
-                tips = "請將雙手往左移動，保持在頭頂正上方" if tip_flag else tips
-                pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_INDEX] if key=='LEFT_INDEX' else point3d[AngleNodeDef.RIGHT_INDEX]
-                pointsOut = [pointStart_x, pointStart_y, (pointStart_x+DISPLACEMENT_DISTANCE), pointStart_y] if tip_flag else pointsOut
-                imagePath = f"{imageFolder}/7.jpg" if tip_flag else imagePath
-            elif index_x>left_shoulder_x:
-                roi[key] = False
                 tips = "請將雙手往右移動，保持在頭頂正上方" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_INDEX] if key=='LEFT_INDEX' else point3d[AngleNodeDef.RIGHT_INDEX]
-                pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
+                pointsOut = [pointStart_x, pointStart_y, (pointStart_x+DISPLACEMENT_DISTANCE), pointStart_y] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/6.jpg" if tip_flag else imagePath
+            elif index_x>left_shoulder_x:
+                roi[key] = False
+                tips = "請將雙手往左移動，保持在頭頂正上方" if tip_flag else tips
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_INDEX] if key=='LEFT_INDEX' else point3d[AngleNodeDef.RIGHT_INDEX]
+                pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
+                imagePath = f"{imageFolder}/7.jpg" if tip_flag else imagePath
     if tips == "":
         tips = "動作正確"
         pointsOut=[]
@@ -519,7 +519,7 @@ def plankPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             else:
                 elbow_x,_,_,elbow_vi =  (point3d[AngleNodeDef.LEFT_ELBOW])
                 shoulder_x,_,_,shoulder_vi =  (point3d[AngleNodeDef.LEFT_SHOULDER])
-            if abs(elbow_x - shoulder_x) < 0.1 and angle_dict[key]>150:
+            if abs(elbow_x - shoulder_x) < 0.15 and angle_dict[key]>150:
                 roi['RIGHT_ELBOW'] = True
                 roi['LEFT_ELBOW'] = True
                 pointsOut = [] if tip_flag else pointsOut
@@ -982,7 +982,7 @@ def DownwardDogRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 pointsOut = [pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE ,pointStart_x, pointStart_y] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/3.jpg" if tip_flag else imagePath
         elif key == f'{side}_HIP':
-            tolerance_val = 10
+            tolerance_val = 15
             min_angle = sample_angle_dict[key]-tolerance_val
             max_angle = sample_angle_dict[key]+tolerance_val
             if angle_dict[key] == -1 :
@@ -1253,7 +1253,7 @@ def SeatedForwardBendRule(roi, tips, sample_angle_dict, angle_dict, point3d):
         elif key == f'{side}_SHOULDER':
             if angle_dict[key] == -1 :
                continue
-            if angle_dict[key]>=80 and angle_dict[key]<100:
+            if angle_dict[key]>=80 and angle_dict[key]<120:
                 roi["LEFT_SHOULDER"] = True
                 roi["RIGHT_SHOULDER"] = True
                 pointsOut=[] if tip_flag else pointsOut
@@ -1356,28 +1356,24 @@ def BridgeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             tip_flag = True
         #detect the side for the pose
         if key == 'NOSE':
-            node_x,_,_,node_vi =  (point3d[AngleNodeDef.NOSE])
-            left_shoulder_x,_,_,left_shoulder_vi  =  (point3d[AngleNodeDef.LEFT_SHOULDER])
-            right_shoulder_x,_,_,right_shoulder_vi =  (point3d[AngleNodeDef.RIGHT_SHOULDER])
-            if node_vi < MIN_DETECT_VISIBILITY:
+            left_hip_x,_,_,left_hip_vi  =  (point3d[AngleNodeDef.LEFT_HIP])
+            right_hip_x,_,_,right_hip_vi =  (point3d[AngleNodeDef.RIGHT_HIP])
+            left_knee_x,_,_,left_knee_vi  =  (point3d[AngleNodeDef.LEFT_KNEE])
+            right_knee_x,_,_,right_knee_vi =  (point3d[AngleNodeDef.RIGHT_KNEE])
+
+            if left_hip_x>left_knee_x:
+                roi[key] = True
+                side = "LEFT"
+                imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
+            elif right_hip_x<right_knee_x:
+                roi[key] = True
+                side = "RIGHT"
+                imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
+            else:
                 roi[key] = False
                 tips = "請將身體平躺下，並將雙手放置於身體兩側" if tip_flag else tips
                 imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
                 break
-            else:
-                if node_x>left_shoulder_x and node_x>right_shoulder_x:
-                    roi[key] = True
-                    side = "LEFT"
-                    imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
-                elif node_x<left_shoulder_x and node_x<right_shoulder_x:
-                    roi[key] = True
-                    side = "RIGHT"
-                    imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
-                else:
-                    roi[key] = False
-                    tips = "請將身體平躺下，並將雙手放置於身體兩側" if tip_flag else tips
-                    imagePath = f"{imageFolder}/5.jpg" if tip_flag else imagePath
-                    break
         if key == f'{side}_KNEE':
             if angle_dict[key] == -1 :
                continue
@@ -1775,7 +1771,7 @@ def TriangleRule(roi, tips, sample_angle_dict, angle_dict, point3d):
         elif key == 'RIGHT_SHOULDER':
             if angle_dict[key] == -1 :
                 continue
-            if angle_dict[key]>=150:
+            if angle_dict[key]>=145:
                 roi["RIGHT_SHOULDER"] = True
                 pointsOut=[] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/1.jpg"
@@ -1949,16 +1945,6 @@ def LocustPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             nose_x,nose_y,_ ,nose_vi= point3d[AngleNodeDef.NOSE]
             if ear_vi <MIN_DETECT_VISIBILITY and nose_vi < MIN_DETECT_VISIBILITY :
                 continue
-            if ear_x <= nose_x:
-                roi[key] = True
-                pointsOut=[] if tip_flag else pointsOut
-                imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
-            else:
-                roi[key] = False
-                tips = "請目視前方"
-                pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.NOSE]
-                pointsOut = [pointStart_x, pointStart_y, pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
-                imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
             if abs(ear_y - nose_y) <= 0.05:
                 roi[key] = True
@@ -2150,8 +2136,8 @@ def CobraPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             _,r_foot_index_y,_,r_foot_index_vi = point3d[AngleNodeDef.RIGHT_FOOT_INDEX]
             if hip_vi <MIN_DETECT_VISIBILITY and knee_vi < MIN_DETECT_VISIBILITY :
                 continue
-            if abs(hip_y - knee_y)<=0.05:
-                if hip_y < r_foot_index_y and hip_y < l_foot_index_y:
+            if abs(hip_y - knee_y)<=0.09:
+                if hip_y <= r_foot_index_y and hip_y <= l_foot_index_y:
                     roi[key] = True
                     pointsOut=[]
                     imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
@@ -2277,8 +2263,8 @@ def HalfmoonposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'RIGHT_ELBOW':
-            min_angle = 175
-            max_angle = 185
+            min_angle = 150
+            max_angle = 180
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2335,8 +2321,8 @@ def HalfmoonposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'LEFT_ELBOW':
-            min_angle = 175
-            max_angle = 185
+            min_angle = 150
+            max_angle = 180
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2358,8 +2344,8 @@ def HalfmoonposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'LEFT_HIP':
-            min_angle = 85
-            max_angle = 95
+            min_angle = 80
+            max_angle = 105
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2437,8 +2423,8 @@ def BoatposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'LEFT_ELBOW':
-            min_angle = 160
-            max_angle = 185
+            min_angle = 120
+            max_angle = 180
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2488,8 +2474,8 @@ def BoatposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'LEFT_KNEE':
-            min_angle = 170
-            max_angle = 195
+            min_angle = 160
+            max_angle = 180
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2520,32 +2506,10 @@ def BoatposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
-        elif key == 'LEFT_ANKLE':
-            min_angle = 125
-            max_angle = 145
-            if angle_dict[key] == -1:
-                continue
-            if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
-                roi[key] = True
-                pointsOut=[] if tip_flag else pointsOut
-                imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
-            elif angle_dict[key]<min_angle:
-                roi[key] = False
-                tips = "請放鬆右腳掌" if tip_flag else tips
-                pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_FOOT_INDEX]
-                pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
-                print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.LEFT_FOOT_INDEX])
-                imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
-            else:
-                roi[key] = False
-                tips = "請將右腳掌勾起" if tip_flag else tips
-                pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_FOOT_INDEX]
-                pointsOut = [pointStart_x, pointStart_y, pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
-                imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'RIGHT_ELBOW':
-            min_angle = 160
-            max_angle = 195
+            min_angle = 120
+            max_angle = 180
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2561,8 +2525,8 @@ def BoatposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'RIGHT_KNEE':
-            min_angle = 170
-            max_angle = 195
+            min_angle = 160
+            max_angle = 180
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2577,28 +2541,6 @@ def BoatposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.RIGHT_KNEE])
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
-        elif key == 'RIGHT_ANKLE':
-            min_angle = 125
-            max_angle = 145
-            if angle_dict[key] == -1:
-                continue
-            if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
-                roi[key] = True
-                pointsOut=[] if tip_flag else pointsOut
-                imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
-            elif angle_dict[key]<min_angle:
-                roi[key] = False
-                tips = "請放鬆左腳掌" if tip_flag else tips
-                pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.RIGHT_FOOT_INDEX]
-                pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
-                print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.RIGHT_FOOT_INDEX])
-                imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
-            else:
-                roi[key] = False
-                tips = "請將左腳掌勾起" if tip_flag else tips
-                pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.RIGHT_FOOT_INDEX]
-                pointsOut = [pointStart_x, pointStart_y, pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
-                imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
     if tips == "":
         tips = "動作正確"
@@ -2633,7 +2575,7 @@ def CamelposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             tip_flag = True
 
         if key == 'LEFT_ELBOW':
-            min_angle = 165
+            min_angle = 140
             max_angle = 180
             if angle_dict[key] == -1:
                 continue
@@ -2651,7 +2593,7 @@ def CamelposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
 
         elif key == 'LEFT_HIP' or key == 'RIGHT_HIP':
             min_angle = 90
-            max_angle = 135
+            max_angle = 150
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
@@ -2667,7 +2609,7 @@ def CamelposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'LEFT_KNEE' or key == 'RIGHT_KNEE':
-            min_angle = 75
+            min_angle = 65
             max_angle = 110
             if angle_dict[key] == -1:
                 continue
@@ -2690,7 +2632,7 @@ def CamelposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'RIGHT_ELBOW':
-            min_angle = 165
+            min_angle = 140
             max_angle = 180
             if angle_dict[key] == -1:
                 continue
@@ -2707,20 +2649,19 @@ def CamelposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'RIGHT_SHOULDER':
-            min_angle = 50
-            max_angle = 95
+            min_angle = 45
             if angle_dict[key] == -1:
                 continue
-            if angle_dict[key]>=min_angle and angle_dict[key]<=max_angle:
+            if angle_dict[key]>=min_angle:
                 roi[key] = True
                 pointsOut=[] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
             else:
                 roi[key] = False
-                tips = "將胸口往上頂"
-                pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.RIGHT_SHOULDER]
-                pointsOut = [pointStart_x, pointStart_y, pointStart_x, pointStart_y-DISPLACEMENT_DISTANCE] if tip_flag else pointsOut
-                print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.RIGHT_SHOULDER])
+                tips = "將雙手放置的位置往後一些"
+                pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.RIGHT_ELBOW]
+                pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
+                print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.RIGHT_ELBOW])
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
 
         elif key == 'RIGHT_EAR':
@@ -2901,7 +2842,7 @@ def FishposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             tip_flag = True
 
         if key == 'RIGHT_KNEE':
-            min_angle = 165
+            min_angle = 160
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle :
@@ -2915,7 +2856,7 @@ def FishposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
         elif key == 'LEFT_KNEE':
-            min_angle = 165
+            min_angle = 160
             if angle_dict[key] == -1:
                 continue
             if angle_dict[key]>=min_angle :
@@ -2958,7 +2899,7 @@ def FishposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
             _,l_eye_y,_ ,l_eye_vi= point3d[AngleNodeDef.LEFT_EYE]
             if l_mouth_vi <MIN_DETECT_VISIBILITY and l_eye_vi < MIN_DETECT_VISIBILITY :
                 continue
-            if (l_eye_y-l_mouth_y)>0.02:
+            if (l_eye_y-l_mouth_y)>0.01:
                 roi[key] = True
                 pointsOut=[] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath

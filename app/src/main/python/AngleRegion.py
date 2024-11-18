@@ -197,10 +197,8 @@ BOAT = {
    'LEFT_HIP': False,
    'LEFT_KNEE': False,
    'LEFT_EAR': False,
-   'LEFT_ANKLE': False,
    'RIGHT_ELBOW': False,
-   'RIGHT_KNEE': False,
-   'RIGHT_ANKLE': False,
+   'RIGHT_KNEE': False
 }
 
 CAMEL = {
