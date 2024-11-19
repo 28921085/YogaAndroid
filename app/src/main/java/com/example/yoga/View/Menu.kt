@@ -66,10 +66,10 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
 
 
     // for判斷左滑/右滑 紀錄手心底的x點位
-    private var previousPalmX: Float? = null
-    private var firstPalmX: Float? = null
-    private var swipeRightDetected = false
-    private var swipeLeftDetected = false
+    private var previousWristX: Float? = null
+    private var firstWristX: Float? = null
+    // 讓上下左右不會一直執行，執行完才會換下一個
+    private var isExecuting = false
 
     // 手部偵測status描述
     private var angleshowtext:String = ""
@@ -111,55 +111,82 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
         select()
     }
     fun up(){
-        var next = when(currentSelect){
-            menuBinding.button3 -> menuBinding.button1
-            menuBinding.button4 -> menuBinding.button2
-            menuBinding.button5 -> menuBinding.button3
-            menuBinding.button6 -> menuBinding.button4
-            menuBinding.button7 -> menuBinding.button5
-            menuBinding.button8 -> menuBinding.button6
-            menuBinding.button9 -> menuBinding.button7
-            menuBinding.button10 -> menuBinding.button8
-
-            else -> currentSelect
+        if(!isExecuting){
+            isExecuting = true
+            var next = when(currentSelect){
+                menuBinding.button3 -> menuBinding.button1
+                menuBinding.button4 -> menuBinding.button2
+                menuBinding.button5 -> menuBinding.button3
+                menuBinding.button6 -> menuBinding.button4
+                menuBinding.button7 -> menuBinding.button5
+                menuBinding.button8 -> menuBinding.button6
+                menuBinding.button9 -> menuBinding.button7
+                menuBinding.button10 -> menuBinding.button8
+                else -> currentSelect
+            }
+            selectTo(next)
+            lifecycleScope.launch {
+                delay(1000)
+                isExecuting = false
+            }
         }
-        selectTo(next)
     }
     fun down(){
-        var next = when(currentSelect){
-            menuBinding.button1-> menuBinding.button3
-            menuBinding.button2-> menuBinding.button4
-            menuBinding.button3-> menuBinding.button5
-            menuBinding.button4-> menuBinding.button6
-            menuBinding.button5-> menuBinding.button7
-            menuBinding.button6-> menuBinding.button8
-            menuBinding.button7-> menuBinding.button9
-            menuBinding.button8 ->menuBinding.button10
-            else -> currentSelect
+        if(!isExecuting){
+            isExecuting = true
+            var next = when(currentSelect){
+                menuBinding.button1-> menuBinding.button3
+                menuBinding.button2-> menuBinding.button4
+                menuBinding.button3-> menuBinding.button5
+                menuBinding.button4-> menuBinding.button6
+                menuBinding.button5-> menuBinding.button7
+                menuBinding.button6-> menuBinding.button8
+                menuBinding.button7-> menuBinding.button9
+                menuBinding.button8 ->menuBinding.button10
+                else -> currentSelect
+            }
+            selectTo(next)
+            lifecycleScope.launch {
+                delay(1000)
+                isExecuting = false
+            }
         }
-        selectTo(next)
     }
     fun left(){
-        var next = when(currentSelect){
-            menuBinding.button2-> menuBinding.button1
-            menuBinding.button4-> menuBinding.button3
-            menuBinding.button6-> menuBinding.button5
-            menuBinding.button8-> menuBinding.button7
-            menuBinding.button10-> menuBinding.button9
-            else -> currentSelect
+        if(!isExecuting){
+            isExecuting = true
+            var next = when(currentSelect){
+                menuBinding.button2-> menuBinding.button1
+                menuBinding.button4-> menuBinding.button3
+                menuBinding.button6-> menuBinding.button5
+                menuBinding.button8-> menuBinding.button7
+                menuBinding.button10-> menuBinding.button9
+                else -> currentSelect
+            }
+            selectTo(next)
+            lifecycleScope.launch {
+                delay(1000)
+                isExecuting = false
+            }
         }
-        selectTo(next)
     }
     fun right(){
-        var next = when(currentSelect){
-            menuBinding.button1-> menuBinding.button2
-            menuBinding.button3-> menuBinding.button4
-            menuBinding.button5-> menuBinding.button6
-            menuBinding.button7-> menuBinding.button8
-            menuBinding.button9-> menuBinding.button10
-            else -> currentSelect
+        if(!isExecuting){
+            isExecuting = true
+            var next = when(currentSelect){
+                menuBinding.button1-> menuBinding.button2
+                menuBinding.button3-> menuBinding.button4
+                menuBinding.button5-> menuBinding.button6
+                menuBinding.button7-> menuBinding.button8
+                menuBinding.button9-> menuBinding.button10
+                else -> currentSelect
+            }
+            selectTo(next)
+            lifecycleScope.launch {
+                delay(1000)
+                isExecuting = false
+            }
         }
-        selectTo(next)
     }
 
     private fun startCamera() {
@@ -221,67 +248,6 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
             )
         }
     }
-
-    private fun handleSwipePoseDetection(resultBundle: HandLandmarkerHelper.ResultBundle) {
-
-        this.runOnUiThread {
-
-            // Pass the results to GestureOverlayView
-            menuBinding.gestureOverlay.setResults(
-                handLandmarkerResults = resultBundle.results.first(),
-                imageHeight = menuBinding.camera.height,
-                imageWidth = menuBinding.camera.width,
-                runningMode = RunningMode.LIVE_STREAM
-            )
-        }
-
-        // Detect swipe direction using the palm landmark (index 0)
-        val palmLandmark = resultBundle.results.first().landmarks().firstOrNull()?.get(0)
-        if (palmLandmark != null) {
-            val currentPalmX = palmLandmark.x()
-
-            // 當手第一次在鏡頭裡被偵測到，紀錄下它的點位
-            if (firstPalmX == null) {
-                firstPalmX = currentPalmX
-            }
-
-
-            firstPalmX?.let { initialPalmX ->
-                previousPalmX?.let { prevX ->
-                    Log.d("value", "Value: $currentPalmX and $prevX")
-                    if (currentPalmX > initialPalmX + 0.3 && !swipeRightDetected) {
-                        Log.d("SwipeDetection", "Swiping right")
-                        menuBinding.angleShow.text = "右滑"
-                        swipeRightDetected = true
-                        if(threadFlag){
-                            runOnUiThread {
-                                nextpage(currentSelect.text.toString())
-                            }
-                        }
-                    } else if (currentPalmX < initialPalmX - 0.3 && !swipeLeftDetected) {
-                        Log.d("SwipeDetection", "Swiping left")
-                        menuBinding.angleShow.text = "左滑"
-                        swipeLeftDetected = true
-                        swipeRightDetected = false
-                        if(threadFlag){
-                            runOnUiThread {
-                                lastpage()
-                            }
-                        }
-                        swipeLeftDetected = false
-                    } else {
-                        Log.d("SwipeDetection", "Not Swiping")
-                        menuBinding.angleShow.text = "無偵測到滑動"
-                    }
-                }
-                previousPalmX = currentPalmX
-            }
-        } else {
-             // Reset firstPalmX and firstPalmY if the hand is outside of the camera
-            firstPalmX = null
-        }
-    }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -453,6 +419,210 @@ class Menu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
     }
 
     override fun onResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
-        handleSwipePoseDetection(resultBundle)
+        this.runOnUiThread {
+
+            // Pass the results to GestureOverlayView
+            menuBinding.gestureOverlay.setResults(
+                    handLandmarkerResults = resultBundle.results.first(),
+                    imageHeight = menuBinding.camera.height,
+                    imageWidth = menuBinding.camera.width,
+                    runningMode = RunningMode.LIVE_STREAM
+            )
+
+            handlerDecider(resultBundle)
+        }
+
+    }
+
+    private fun handlerDecider(resultBundle: HandLandmarkerHelper.ResultBundle){
+        // if user face their palm to the camera
+        val wholeFingerLandmark = resultBundle.results.first().landmarks().firstOrNull()
+
+        //成功偵測到手部點位
+        if(wholeFingerLandmark != null){
+            val wrist = wholeFingerLandmark.get(0)
+            val thumbTIP = wholeFingerLandmark.get(4)
+            val indexTIP = wholeFingerLandmark.get(8)
+            val indexDIP = wholeFingerLandmark.get(7)
+            val middleTIP = wholeFingerLandmark.get(12)
+            val middleDIP = wholeFingerLandmark.get(11)
+            val ringTIP = wholeFingerLandmark.get(16)
+            val ringDIP = wholeFingerLandmark.get(15)
+            val pinkyTIP = wholeFingerLandmark.get(20)
+            val pinkyDIP = wholeFingerLandmark.get(19)
+
+            if( indexTIP.x() < indexDIP.x() && // 454~457: 確認四隻手指皆為伸直狀態
+                middleTIP.x() < middleDIP.x() &&
+                ringTIP.x() < ringDIP.x() &&
+                pinkyTIP.x() < pinkyDIP.x() &&
+                indexTIP.x() < wrist.x() && // 458~461: 四隻手指皆指向右側
+                middleTIP.x() < wrist.x() &&
+                ringTIP.x() < wrist.x() &&
+                pinkyTIP.x() < wrist.x() &&
+                thumbTIP.y() < wrist.y() && // 462~466: 五隻手指皆位於手腕點位上方
+                indexTIP.y() < wrist.y() &&
+                middleTIP.y() < wrist.y() &&
+                ringTIP.y() < wrist.y() &&
+                pinkyTIP.y() < wrist.y() &&
+                thumbTIP.y() < indexTIP.y() // 467: 拇指的點位y離上方的距離較近，食指距離較遠
+                ) {
+                lifecycleScope.launch {
+                    delay(1000)
+                    menuBinding.angleShow.text = "上一頁"
+                    if(threadFlag){
+                        runOnUiThread {
+                            lastpage()
+                        }
+                    }
+                }
+            }
+            else if(indexTIP.x() > indexDIP.x() && // 479～482: 確認四隻手指皆為伸直狀態
+                    middleTIP.x() > middleDIP.x() &&
+                    ringTIP.x() > ringDIP.x() &&
+                    pinkyTIP.x() > pinkyDIP.x() &&
+                    indexTIP.x() > wrist.x() && // 483~486: 四隻手指皆指向右側
+                    middleTIP.x() > wrist.x() &&
+                    ringTIP.x() > wrist.x() &&
+                    pinkyTIP.x() > wrist.x() &&
+                    thumbTIP.y() < wrist.y() && // 487~491: 五隻手指皆位於手腕點位上方
+                    indexTIP.y() < wrist.y() &&
+                    middleTIP.y() < wrist.y() &&
+                    ringTIP.y() < wrist.y() &&
+                    pinkyTIP.y() < wrist.y() &&
+                    thumbTIP.y() < indexTIP.y() // 492: 拇指的點位y離上方的距離較近，食指距離較遠
+                ){
+                lifecycleScope.launch {
+                    delay(1000)
+                    menuBinding.angleShow.text = "下一頁"
+                    if(threadFlag){
+                        runOnUiThread {
+                            nextpage(currentSelect.text.toString())
+                        }
+                    }
+                }
+            }else {
+                handlePointingDirection(resultBundle)
+            }
+        }
+        else {
+            "no hand detected on the screen".also { menuBinding.angleShow.text = it }
+        }
+    }
+
+    private fun handleSwipePoseDetection(resultBundle: HandLandmarkerHelper.ResultBundle) {
+        val wristLandmark = resultBundle.results.first().landmarks().firstOrNull()?.get(0)
+
+        if (wristLandmark != null) {
+            val currentWristX = wristLandmark.x()
+
+            // 當手第一次在鏡頭裡被偵測到，紀錄下它的點位
+            if (firstWristX == null) {
+                firstWristX = currentWristX
+            }
+
+            firstWristX?.let { initialWristX ->
+                previousWristX?.let { prevX ->
+                    Log.d("value", "Value: $currentWristX and $prevX")
+                    if (currentWristX > initialWristX + 0.2) {
+                        Log.d("SwipeDetection", "Swiping right")
+                        menuBinding.angleShow.text = "右滑"
+                        if(threadFlag){
+                            this.runOnUiThread {
+                                nextpage(currentSelect.text.toString())
+                            }
+                        }
+                    } else if (currentWristX < initialWristX - 0.2) {
+                        Log.d("SwipeDetection", "Swiping left")
+                        menuBinding.angleShow.text = "左滑"
+                        if(threadFlag){
+                            this.runOnUiThread {
+                                lastpage()
+                            }
+                        }
+                    } else {
+                        Log.d("SwipeDetection", "Not Swiping")
+                        firstWristX = currentWristX
+                    }
+                }
+                previousWristX = currentWristX
+            }
+        }
+        else {
+            // Reset firstWrist if the hand is outside of the camera
+            firstWristX = null
+        }
+    }
+
+    private fun handlePointingDirection(resultBundle: HandLandmarkerHelper.ResultBundle) {
+
+        val wholeFingerLandmark = resultBundle.results.first().landmarks().firstOrNull()
+
+        if (wholeFingerLandmark != null) {
+
+            // Detect pointing direction using fingertips' landmarks
+            // Get landmarks
+            val wrist = wholeFingerLandmark.get(0)
+            val thumbTip = wholeFingerLandmark.get(4)
+            val indexTip = wholeFingerLandmark.get(8)
+            val indexDIP = wholeFingerLandmark.get(7)
+
+            val middleTip = wholeFingerLandmark.get(12)
+            val middlePIP = wholeFingerLandmark.get(10)
+
+            val ringTip = wholeFingerLandmark.get(16)
+            val ringPIP = wholeFingerLandmark.get(14)
+
+            val pinkyTip = wholeFingerLandmark.get(20)
+            val pinkyPIP = wholeFingerLandmark.get(18)
+
+            // Pointing Down
+            if (thumbTip.y() < indexTip.y() &&
+                indexDIP.y() < indexTip.y() &&
+                indexTip.y() > wrist.y() &&
+                middleTip.y() < middlePIP.y() &&
+                ringTip.y() < ringPIP.y() &&
+                pinkyTip.y() < pinkyPIP.y()) {
+
+                Log.d("GestureDetection", "Pointing Down")
+                menuBinding.angleShow.text = "向下指"
+                down()
+            }
+            // Pointing Up
+            else if (thumbTip.y() > indexTip.y() &&
+                indexDIP.y() > indexTip.y() &&
+                indexTip.y() < wrist.y() &&
+                middleTip.y() > middlePIP.y() &&
+                ringTip.y() > ringPIP.y() &&
+                pinkyTip.y() > pinkyPIP.y()) {
+
+                Log.d("GestureDetection", "Pointing Up")
+                menuBinding.angleShow.text = "向上指"
+                up()
+            }
+            // Pointing Left
+            else if (indexTip.x() < thumbTip.x() &&
+                indexDIP.x() > indexTip.x() &&
+                indexTip.x() < wrist.x() &&
+                middleTip.x() > middlePIP.x() &&
+                ringTip.x() > ringPIP.x() &&
+                pinkyTip.x() > pinkyPIP.x()) {
+
+                Log.d("GestureDetection", "Pointing Left")
+                menuBinding.angleShow.text = "向左指"
+                left()
+            }
+            // Pointing Right
+            else if (indexTip.x() > thumbTip.x() &&
+                indexDIP.x() < indexTip.x() &&
+                indexTip.x() > wrist.x() &&
+                middleTip.x() < middlePIP.x() &&
+                ringTip.x() < ringPIP.x() &&
+                pinkyTip.x() < pinkyPIP.x()) {
+
+                Log.d("GestureDetection", "Pointing Right")
+                menuBinding.angleShow.text = "向右指"
+                right()
+            }
+        }
     }
 }
