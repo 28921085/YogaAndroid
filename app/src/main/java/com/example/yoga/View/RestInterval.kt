@@ -7,14 +7,24 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.lifecycleScope
+import com.example.yoga.Model.FinishTimer
+import com.example.yoga.Model.GlobalVariable
 import com.example.yoga.Model.KSecCountdownTimer
 import com.example.yoga.ViewModel.TrainingMenuViewModel
 //import com.example.yoga.Model.TrainingProcess
 import com.example.yoga.databinding.ActivityRestIntervalBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.util.concurrent.ExecutorService
 
 
 class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
     private lateinit var restIntervalBinding: ActivityRestIntervalBinding
+    private var global= GlobalVariable.getInstance()
+    private lateinit var backgroundExecutor: ExecutorService
+    private var timerCurrent = FinishTimer()
+
     private var timer30S = KSecCountdownTimer(30)// 測試時設置為 5 秒
     var mode = ""
     var poseList = arrayOf<String>()
@@ -77,5 +87,32 @@ class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
             onTimerFinished()
         }
         timer30S.startTimer(this)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch {
+            delay(800)
+            global.backgroundMusic.play()
+        }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        timer30S.stopTimer()
+        timerCurrent.handlerStop()
+
+        global.backgroundMusic.pause()
+        //關掉相機
+        // 開這個會閃退，可能是只有 YogaMain 有開這個東西
+//        backgroundExecutor.shutdown()
+    }
+    override fun onPause() {
+        super.onPause()
+        global.TTS.stop()
+        global.backgroundMusic.pause()
+    }
+    override fun onResume() {
+        super.onResume()
+        global.backgroundMusic.play()
     }
 }

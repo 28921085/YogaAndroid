@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.util.Log
 import android.util.Rational
 import android.util.Size
+import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -125,6 +126,7 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
     fun nextpage(){
         Log.d("Main 訓練模式", "$mode")
         threadFlag = false // to stop thread
+
         if(mode == "AllPose"){
             val intent = Intent(this, YogaResult::class.java).apply {
                 putExtra("mode", mode)
@@ -174,6 +176,12 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
 
         }
     }
+    // 跳過動作
+    fun onActionSkip() {
+        score = 0.0
+        nextpage()
+    }
+
     //30秒倒數結束
     override fun onTimerFinished() {
         timer30S.setRemainTimeStr("结束")
@@ -239,9 +247,17 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
             totalScore = intent.getDoubleExtra("totalScore", 0.0)
             totalTime = intent.getDoubleExtra("totalTime", 0.0)
             yogamainBinding.title.text = menuTitle
+
+            yogamainBinding.skip.visibility = View.VISIBLE
         }
         else if (mode == "AllPose"){
             yogamainBinding.title.text = poseName
+        }
+
+
+        // 跳過目前動作
+        yogamainBinding.skip.setOnClickListener {
+            onActionSkip()
         }
 
 
@@ -463,7 +479,7 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
                     // 分數計算器
 //                     var score = scoreCalculator.callAttr("calculate_score", floatListList, true)
                      println("score ${score}")
-//                     yogamainBinding.score.text = "分數 ${score}"
+                     yogamainBinding.score.text = "分數 ${score}"
 //                    yogamainBinding.score.text = ""
 
                     yogamainBinding.yogaMat.setLeftFeetPosition(left_x, left_y);
