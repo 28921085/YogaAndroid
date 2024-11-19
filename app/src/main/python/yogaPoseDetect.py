@@ -60,7 +60,7 @@ class YogaPose:
 
         con = sum(1 for i in point3d if i[3] < toolkit.MIN_DETECT_VISIBILITY)
 
-        if(con>24):  #half of all node
+        if(con>16):  #half of all node
             self.tips="無法偵測到完整骨架"
             self.imagePath =  get_image_path(self.type)
             self.pointsOut=[]
