@@ -5,9 +5,11 @@ import android.app.Application
 class GlobalVariable: Application() {
     lateinit var TTS:MyTTS
     lateinit var backgroundMusic:MyMediaPlayer
+
     companion object {//單例模式
         @Volatile
         private var instance: GlobalVariable? = null
+
 
         fun getInstance(): GlobalVariable {
             return instance ?: synchronized(this) {

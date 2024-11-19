@@ -26,5 +26,8 @@ class MyTTS(){
         textToSpeech?.shutdown()
         textToSpeech = null
     }
-    fun stop(){textToSpeech?.stop()}
+    fun stop(){
+        textToSpeech?.stop()
+        Thread.sleep(50) // 短暫延遲，確保播放列隊清空
+    }
 }

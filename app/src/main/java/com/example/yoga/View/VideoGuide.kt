@@ -158,5 +158,6 @@ class VideoGuide : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         global.backgroundMusic.play()
+        videoGuideBinding.videoPlayer.start()
     }
 }

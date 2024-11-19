@@ -33,6 +33,19 @@ class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
     var menuTitle = ""
     var totalScore = 0.0
     var totalTime = 0.0
+    private var threadFlag : Boolean = true
+
+    fun lastpage(){
+        Log.d("Main 訓練階段", "$mode")
+        threadFlag = false // to stop thread
+
+        timer30S.stopTimer()
+        timerCurrent.handlerStop()
+        val intent = Intent(this, TrainingMenu::class.java)
+        startActivity(intent)
+        finish()
+
+    }
 
     override fun onTimerFinished() {
         Log.d("Rest menuTitle", "$menuTitle")
@@ -85,6 +98,10 @@ class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
 
         restIntervalBinding.skip.setOnClickListener {
             onTimerFinished()
+        }
+        restIntervalBinding.back.setOnClickListener {
+            Log.d("YogaMain Debug", "點選返回按鈕")
+            lastpage()
         }
         timer30S.startTimer(this)
     }

@@ -20,4 +20,21 @@ class MyMediaPlayer {
             mediaPlayer.pause()
     }
     fun stop(){mediaPlayer.stop()}
+
+//    fun play() {
+//        if (!isPlaying()) {
+//            mediaPlayer.start()
+//        }
+//    }
+//    fun pause() {
+//        if (isPlaying()) {
+//            mediaPlayer.pause()
+//        }
+//    }
+//    fun stop(){
+//        mediaPlayer.stop()
+//    }
+//    fun isPlaying(): Boolean {
+//        return mediaPlayer.isPlaying
+//    }
 }

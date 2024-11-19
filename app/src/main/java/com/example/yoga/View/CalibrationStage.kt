@@ -234,6 +234,8 @@ class CalibrationStage : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerLi
         //關掉相機
         backgroundExecutor.shutdown()
         global.backgroundMusic.pause()
+        global.TTS.stop()
+
     }
     override fun onError(error: String, errorCode: Int) {
         this.runOnUiThread {

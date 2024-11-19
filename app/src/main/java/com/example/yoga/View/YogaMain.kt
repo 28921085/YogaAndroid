@@ -477,9 +477,9 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
                     var right_y = yogamatProcessor.callAttr("get_right_foot_y").toFloat()
 
                     // 分數計算器
-//                     var score = scoreCalculator.callAttr("calculate_score", floatListList, true)
-                     println("score ${score}")
-                     yogamainBinding.score.text = "分數 ${score}"
+                     var currentScore = scoreCalculator.callAttr("calculate_score", floatListList, true)
+                     println("score ${currentScore}")
+                     yogamainBinding.score.text = "分數 ${currentScore}"
 //                    yogamainBinding.score.text = ""
 
                     yogamainBinding.yogaMat.setLeftFeetPosition(left_x, left_y);
@@ -603,7 +603,7 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
         super.onDestroy()
         timer30S.stopTimer()
         timerCurrent.handlerStop()
-
+        global.TTS.stop()
         global.backgroundMusic.pause()
         //關掉相機
         backgroundExecutor.shutdown()
@@ -612,9 +612,17 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
         super.onPause()
         global.TTS.stop()
         global.backgroundMusic.pause()
+
+//        if (global.backgroundMusic.isPlaying()) {
+//            global.backgroundMusic.pause()
+//        }
     }
     override fun onResume() {
         super.onResume()
         global.backgroundMusic.play()
+
+//        if (!global.backgroundMusic.isPlaying()) {
+//            global.backgroundMusic.play()
+//        }
     }
 }
