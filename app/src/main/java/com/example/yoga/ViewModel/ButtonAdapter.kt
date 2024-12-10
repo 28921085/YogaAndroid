@@ -11,12 +11,13 @@ import com.example.yoga.R
 
 class ButtonAdapter(
     private val context: Context,
-    val poseNames: Array<String>,
+    private val poseNames: Array<String>,
     private val onButtonClick: (String) -> Unit
 ) : RecyclerView.Adapter<ButtonAdapter.ButtonViewHolder>() {
 
-    private val buttonReferences = mutableListOf<Button>()
     private var selectedIndex: Int = 0
+    private val buttonReferences = mutableMapOf<Int, Button>()
+
     inner class ButtonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val button: Button = itemView.findViewById(R.id.buttonItem)
     }
@@ -35,25 +36,38 @@ class ButtonAdapter(
 
         holder.button.setOnClickListener {
             onButtonClick(poseName)
+            setSelectedIndex(position) // Update selected index on button click
+
         }
+
         // 確保按鈕引用是唯一的
-        if (!buttonReferences.contains(holder.button)) {
-            buttonReferences.add(holder.button)
-        }
+        // Ensure button references are unique and correctly populated
+        buttonReferences[position] = holder.button
     }
+
     override fun getItemCount(): Int {
         return poseNames.size
     }
+
     // Function 1: 根據索引獲取按鈕的參考
     fun getButtonByIndex(index: Int): Button {
-        return buttonReferences[index]
+        return buttonReferences[index] ?: throw IllegalArgumentException("Button not found for index $index")
     }
+
     // Function 2: 根據按鈕的參考獲取它的索引
     fun getIndexByButton(button: Button): Int {
-        return buttonReferences.indexOf(button)
+        for ((index, btn) in buttonReferences) {
+            if (btn == button) {
+                return index
+            }
+        }
+        throw IllegalArgumentException("Button not found in map")
     }
+    
     fun setSelectedIndex(index: Int) {
+        val previousIndex = selectedIndex
         selectedIndex = index
-        notifyDataSetChanged()
+        notifyItemChanged(previousIndex)
+        notifyItemChanged(selectedIndex)
     }
 }
