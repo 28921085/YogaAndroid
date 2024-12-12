@@ -68,7 +68,6 @@ class AllPoseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener
     //開個thread
     private lateinit var backgroundExecutor: ExecutorService
 
-
     // yogaMat function
     private lateinit var python : Python
     private lateinit var yogaMat : PyObject
@@ -76,10 +75,6 @@ class AllPoseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener
     private var threadFlag : Boolean = true
     private var functionNumber: Int = 0
 
-
-    // for判斷左滑/右滑 紀錄手心底的x點位
-    private var previousWristX: Float? = null
-    private var firstWristX: Float? = null
     private var isExecuting = false
 
     // 手部偵測status描述
@@ -94,6 +89,7 @@ class AllPoseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener
     }
 
     fun nextpage() {
+        threadFlag = false
         nextpage(currentSelect.text.toString())
     }
 
@@ -396,22 +392,30 @@ class AllPoseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener
 
         //成功偵測到手部點位
         if(wholeFingerLandmark != null){
-            val wrist = wholeFingerLandmark.get(0)
-            val thumbTIP = wholeFingerLandmark.get(4)
-            val indexTIP = wholeFingerLandmark.get(8)
-            val indexDIP = wholeFingerLandmark.get(7)
-            val middleTIP = wholeFingerLandmark.get(12)
-            val middleDIP = wholeFingerLandmark.get(11)
-            val ringTIP = wholeFingerLandmark.get(16)
-            val ringDIP = wholeFingerLandmark.get(15)
-            val pinkyTIP = wholeFingerLandmark.get(20)
-            val pinkyDIP = wholeFingerLandmark.get(19)
+            val wrist = wholeFingerLandmark[0]
+            val thumbTIP = wholeFingerLandmark[4]
+            val indexPIP = wholeFingerLandmark[6]
+            val indexTIP = wholeFingerLandmark[8]
+            val indexDIP = wholeFingerLandmark[7]
+            val middlePIP = wholeFingerLandmark[10]
+            val middleTIP = wholeFingerLandmark[12]
+            val middleDIP = wholeFingerLandmark[11]
+            val ringPIP = wholeFingerLandmark[14]
+            val ringTIP = wholeFingerLandmark[16]
+            val ringDIP = wholeFingerLandmark[15]
+            val pinkyPIP = wholeFingerLandmark[18]
+            val pinkyTIP = wholeFingerLandmark[20]
+            val pinkyDIP = wholeFingerLandmark[19]
 
             if( indexTIP.x() < indexDIP.x() && // 454~457: 確認四隻手指皆為伸直狀態
                 middleTIP.x() < middleDIP.x() &&
                 ringTIP.x() < ringDIP.x() &&
                 pinkyTIP.x() < pinkyDIP.x() &&
-                indexTIP.x() < wrist.x() && // 458~461: 四隻手指皆指向右側
+                indexDIP.x() < indexPIP.x() &&
+                middleDIP.x() < middlePIP.x() &&
+                ringDIP.x() < ringPIP.x() &&
+                pinkyDIP.x() < pinkyPIP.x() &&
+                indexTIP.x() < wrist.x() && // 458~461: 四隻手指皆指向左側
                 middleTIP.x() < wrist.x() &&
                 ringTIP.x() < wrist.x() &&
                 pinkyTIP.x() < wrist.x() &&
@@ -436,6 +440,10 @@ class AllPoseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener
                 middleTIP.x() > middleDIP.x() &&
                 ringTIP.x() > ringDIP.x() &&
                 pinkyTIP.x() > pinkyDIP.x() &&
+                indexDIP.x() > indexPIP.x() &&
+                middleDIP.x() > middlePIP.x() &&
+                ringDIP.x() > ringPIP.x() &&
+                pinkyDIP.x() > pinkyPIP.x() &&
                 indexTIP.x() > wrist.x() && // 483~486: 四隻手指皆指向右側
                 middleTIP.x() > wrist.x() &&
                 ringTIP.x() > wrist.x() &&

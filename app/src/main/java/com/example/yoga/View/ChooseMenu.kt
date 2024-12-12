@@ -78,13 +78,11 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
     fun nextpage() {
         Log.d("next page", "next page")
         threadFlag = false
-        var intent : Intent? = Intent(this, AllPoseMenu::class.java)
 
-        if(currentSelect == allPoseBtn){
-            intent = Intent(this, AllPoseMenu::class.java)
-        }
-        else if(currentSelect == trainMenuBtn) {
-            intent = Intent(this, TrainingMenu::class.java)
+        val intent: Intent = when (currentSelect) {
+            allPoseBtn -> Intent(this, AllPoseMenu::class.java)
+            trainMenuBtn -> Intent(this, TrainingMenu::class.java)
+            else -> return // or handle the default case appropriately
         }
         startActivity(intent)
         finish()
@@ -208,7 +206,6 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
         // Set click listeners for buttons
         allPoseBtn.setOnClickListener {
             selectButton(allPoseBtn)
-            threadFlag = false
             val intent = Intent(this, AllPoseMenu::class.java)
             startActivity(intent)
             finish()
@@ -216,8 +213,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
 
         trainMenuBtn.setOnClickListener {
             selectButton(trainMenuBtn)
-            threadFlag = false
-            val intent = Intent(this, AllPoseMenu::class.java)
+            val intent = Intent(this, TrainingMenu::class.java)
             startActivity(intent)
             finish()
         }
@@ -252,7 +248,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
                     }
                     if (yogaMat.callAttr("checkReturn").toBoolean()) {
                         runOnUiThread{
-
+                            nextpage()
                         }
                         break
                     }
@@ -349,22 +345,30 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
 
         //成功偵測到手部點位
         if(wholeFingerLandmark != null){
-            val wrist = wholeFingerLandmark.get(0)
-            val thumbTIP = wholeFingerLandmark.get(4)
-            val indexTIP = wholeFingerLandmark.get(8)
-            val indexDIP = wholeFingerLandmark.get(7)
-            val middleTIP = wholeFingerLandmark.get(12)
-            val middleDIP = wholeFingerLandmark.get(11)
-            val ringTIP = wholeFingerLandmark.get(16)
-            val ringDIP = wholeFingerLandmark.get(15)
-            val pinkyTIP = wholeFingerLandmark.get(20)
-            val pinkyDIP = wholeFingerLandmark.get(19)
+            val wrist = wholeFingerLandmark[0]
+            val thumbTIP = wholeFingerLandmark[4]
+            val indexPIP = wholeFingerLandmark[6]
+            val indexTIP = wholeFingerLandmark[8]
+            val indexDIP = wholeFingerLandmark[7]
+            val middlePIP = wholeFingerLandmark[10]
+            val middleTIP = wholeFingerLandmark[12]
+            val middleDIP = wholeFingerLandmark[11]
+            val ringPIP = wholeFingerLandmark[14]
+            val ringTIP = wholeFingerLandmark[16]
+            val ringDIP = wholeFingerLandmark[15]
+            val pinkyPIP = wholeFingerLandmark[18]
+            val pinkyTIP = wholeFingerLandmark[20]
+            val pinkyDIP = wholeFingerLandmark[19]
 
             if( indexTIP.x() < indexDIP.x() && // 454~457: 確認四隻手指皆為伸直狀態
                 middleTIP.x() < middleDIP.x() &&
                 ringTIP.x() < ringDIP.x() &&
                 pinkyTIP.x() < pinkyDIP.x() &&
-                indexTIP.x() < wrist.x() && // 458~461: 四隻手指皆指向右側
+                indexDIP.x() < indexPIP.x() &&
+                middleDIP.x() < middlePIP.x() &&
+                ringDIP.x() < ringPIP.x() &&
+                pinkyDIP.x() < pinkyPIP.x() &&
+                indexTIP.x() < wrist.x() && // 458~461: 四隻手指皆指向左側
                 middleTIP.x() < wrist.x() &&
                 ringTIP.x() < wrist.x() &&
                 pinkyTIP.x() < wrist.x() &&
@@ -389,6 +393,10 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
                 middleTIP.x() > middleDIP.x() &&
                 ringTIP.x() > ringDIP.x() &&
                 pinkyTIP.x() > pinkyDIP.x() &&
+                indexDIP.x() > indexPIP.x() &&
+                middleDIP.x() > middlePIP.x() &&
+                ringDIP.x() > ringPIP.x() &&
+                pinkyDIP.x() > pinkyPIP.x() &&
                 indexTIP.x() > wrist.x() && // 483~486: 四隻手指皆指向右側
                 middleTIP.x() > wrist.x() &&
                 ringTIP.x() > wrist.x() &&
@@ -427,19 +435,19 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
 
             // Detect pointing direction using fingertips' landmarks
             // Get landmarks
-            val wrist = wholeFingerLandmark.get(0)
-            val thumbTip = wholeFingerLandmark.get(4)
-            val indexTip = wholeFingerLandmark.get(8)
-            val indexDIP = wholeFingerLandmark.get(7)
+            val wrist = wholeFingerLandmark[0]
+            val thumbTip = wholeFingerLandmark[4]
+            val indexTip = wholeFingerLandmark[8]
+            val indexDIP = wholeFingerLandmark[7]
 
-            val middleTip = wholeFingerLandmark.get(12)
-            val middlePIP = wholeFingerLandmark.get(10)
+            val middleTip = wholeFingerLandmark[12]
+            val middlePIP = wholeFingerLandmark[10]
 
-            val ringTip = wholeFingerLandmark.get(16)
-            val ringPIP = wholeFingerLandmark.get(14)
+            val ringTip = wholeFingerLandmark[16]
+            val ringPIP = wholeFingerLandmark[14]
 
-            val pinkyTip = wholeFingerLandmark.get(20)
-            val pinkyPIP = wholeFingerLandmark.get(18)
+            val pinkyTip = wholeFingerLandmark[20]
+            val pinkyPIP = wholeFingerLandmark[18]
 
             // Pointing Down
             if (thumbTip.y() < indexTip.y() &&
