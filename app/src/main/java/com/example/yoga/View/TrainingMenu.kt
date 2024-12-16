@@ -230,6 +230,9 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
     }
 
     private fun startCamera() {
+        lifecycleScope.launch {
+            delay(800)
+        }
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener(Runnable {
@@ -455,95 +458,96 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
         }
     }
 
-    private fun handlerDecider(resultBundle: HandLandmarkerHelper.ResultBundle){
+        private fun handlerDecider(resultBundle: HandLandmarkerHelper.ResultBundle){
         // if user face their palm to the camera
         val wholeFingerLandmark = resultBundle.results.first().landmarks().firstOrNull()
 
         //成功偵測到手部點位
-        if(wholeFingerLandmark != null){
-            val wrist = wholeFingerLandmark[0]
-            val thumbTIP = wholeFingerLandmark[4]
-            val indexPIP = wholeFingerLandmark[6]
-            val indexTIP = wholeFingerLandmark[8]
-            val indexDIP = wholeFingerLandmark[7]
-            val middlePIP = wholeFingerLandmark[10]
-            val middleTIP = wholeFingerLandmark[12]
-            val middleDIP = wholeFingerLandmark[11]
-            val ringPIP = wholeFingerLandmark[14]
-            val ringTIP = wholeFingerLandmark[16]
-            val ringDIP = wholeFingerLandmark[15]
-            val pinkyPIP = wholeFingerLandmark[18]
-            val pinkyTIP = wholeFingerLandmark[20]
-            val pinkyDIP = wholeFingerLandmark[19]
+        if (wholeFingerLandmark != null) {
+            if (!handlePointingDirection(resultBundle)) {
+                val wrist = wholeFingerLandmark[0]
+                val thumbTIP = wholeFingerLandmark[4]
+                val indexPIP = wholeFingerLandmark[6]
+                val indexTIP = wholeFingerLandmark[8]
+                val indexDIP = wholeFingerLandmark[7]
+                val middlePIP = wholeFingerLandmark[10]
+                val middleTIP = wholeFingerLandmark[12]
+                val middleDIP = wholeFingerLandmark[11]
+                val ringPIP = wholeFingerLandmark[14]
+                val ringTIP = wholeFingerLandmark[16]
+                val ringDIP = wholeFingerLandmark[15]
+                val pinkyPIP = wholeFingerLandmark[18]
+                val pinkyTIP = wholeFingerLandmark[20]
+                val pinkyDIP = wholeFingerLandmark[19]
 
-            if( indexTIP.x() < indexDIP.x() && // 454~457: 確認四隻手指皆為伸直狀態
-                middleTIP.x() < middleDIP.x() &&
-                ringTIP.x() < ringDIP.x() &&
-                pinkyTIP.x() < pinkyDIP.x() &&
-                indexDIP.x() < indexPIP.x() &&
-                middleDIP.x() < middlePIP.x() &&
-                ringDIP.x() < ringPIP.x() &&
-                pinkyDIP.x() < pinkyPIP.x() &&
-                indexTIP.x() < wrist.x() && // 458~461: 四隻手指皆指向左側
-                middleTIP.x() < wrist.x() &&
-                ringTIP.x() < wrist.x() &&
-                pinkyTIP.x() < wrist.x() &&
-                thumbTIP.y() < wrist.y() && // 462~466: 五隻手指皆位於手腕點位上方
-                indexTIP.y() < wrist.y() &&
-                middleTIP.y() < wrist.y() &&
-                ringTIP.y() < wrist.y() &&
-                pinkyTIP.y() < wrist.y() &&
-                thumbTIP.y() < indexTIP.y() // 467: 拇指的點位y離上方的距離較近，食指距離較遠
-            ) {
-                lifecycleScope.launch {
-                    delay(1000)
-                    trainingMenuBinding.angleShow.text = "上一頁"
-                    if(threadFlag){
-                        runOnUiThread {
-                            lastpage()
+                when {
+                    indexTIP.x() < indexDIP.x() && // 確認四隻手指皆為伸直狀態
+                            middleTIP.x() < middleDIP.x() &&
+                            ringTIP.x() < ringDIP.x() &&
+                            pinkyTIP.x() < pinkyDIP.x() &&
+                            indexDIP.x() < indexPIP.x() &&
+                            middleDIP.x() < middlePIP.x() &&
+                            ringDIP.x() < ringPIP.x() &&
+                            pinkyDIP.x() < pinkyPIP.x() &&
+                            indexTIP.x() < wrist.x() && // 四隻手指皆指向左側
+                            middleTIP.x() < wrist.x() &&
+                            ringTIP.x() < wrist.x() &&
+                            pinkyTIP.x() < wrist.x() &&
+                            thumbTIP.y() < wrist.y() && // 五隻手指皆位於手腕點位上方
+                            indexTIP.y() < wrist.y() &&
+                            middleTIP.y() < wrist.y() &&
+                            ringTIP.y() < wrist.y() &&
+                            pinkyTIP.y() < wrist.y() &&
+                            thumbTIP.y() < indexTIP.y() -> { // 拇指的點位y離上方的距離較近，食指距離較遠
+                        lifecycleScope.launch {
+                            delay(1000)
+                            trainingMenuBinding.angleShow.text = "上一頁"
+                            if (threadFlag) {
+                                runOnUiThread {
+                                    lastpage()
+                                }
+                            }
                         }
+                    }
+                    indexTIP.x() > indexDIP.x() && // 確認四隻手指皆為伸直狀態
+                            middleTIP.x() > middleDIP.x() &&
+                            ringTIP.x() > ringDIP.x() &&
+                            pinkyTIP.x() > pinkyDIP.x() &&
+                            indexDIP.x() > indexPIP.x() &&
+                            middleDIP.x() > middlePIP.x() &&
+                            ringDIP.x() > ringPIP.x() &&
+                            pinkyDIP.x() > pinkyPIP.x() &&
+                            indexTIP.x() > wrist.x() && // 四隻手指皆指向右側
+                            middleTIP.x() > wrist.x() &&
+                            ringTIP.x() > wrist.x() &&
+                            pinkyTIP.x() > wrist.x() &&
+                            thumbTIP.y() < wrist.y() && // 五隻手指皆位於手腕點位上方
+                            indexTIP.y() < wrist.y() &&
+                            middleTIP.y() < wrist.y() &&
+                            ringTIP.y() < wrist.y() &&
+                            pinkyTIP.y() < wrist.y() &&
+                            thumbTIP.y() < indexTIP.y() -> { // 拇指的點位y離上方的距離較近，食指距離較遠
+                        lifecycleScope.launch {
+                            delay(1000)
+                            trainingMenuBinding.angleShow.text = "下一頁"
+                            if (threadFlag) {
+                                runOnUiThread {
+                                    startTraining()
+                                }
+                            }
+                        }
+                    }
+                    else -> {
+                        "no hand detected on the screen".also { trainingMenuBinding.angleShow.text = it }
                     }
                 }
             }
-            else if(indexTIP.x() > indexDIP.x() && // 479～482: 確認四隻手指皆為伸直狀態
-                middleTIP.x() > middleDIP.x() &&
-                ringTIP.x() > ringDIP.x() &&
-                pinkyTIP.x() > pinkyDIP.x() &&
-                indexDIP.x() > indexPIP.x() &&
-                middleDIP.x() > middlePIP.x() &&
-                ringDIP.x() > ringPIP.x() &&
-                pinkyDIP.x() > pinkyPIP.x() &&
-                indexTIP.x() > wrist.x() && // 483~486: 四隻手指皆指向右側
-                middleTIP.x() > wrist.x() &&
-                ringTIP.x() > wrist.x() &&
-                pinkyTIP.x() > wrist.x() &&
-                thumbTIP.y() < wrist.y() && // 487~491: 五隻手指皆位於手腕點位上方
-                indexTIP.y() < wrist.y() &&
-                middleTIP.y() < wrist.y() &&
-                ringTIP.y() < wrist.y() &&
-                pinkyTIP.y() < wrist.y() &&
-                thumbTIP.y() < indexTIP.y() // 492: 拇指的點位y離上方的距離較近，食指距離較遠
-            ){
-                lifecycleScope.launch {
-                    delay(1000)
-                    trainingMenuBinding.angleShow.text = "下一頁"
-                    if(threadFlag){
-                        runOnUiThread {
-                            Log.d("current select", currentSelect.text.toString())
-                            startTraining()
-                        }
-                    }
-                }
-            }else {
-                handlePointingDirection(resultBundle)
-            }
-        }
-        else {
+        } else {
             "no hand detected on the screen".also { trainingMenuBinding.angleShow.text = it }
         }
     }
 
-    private fun handlePointingDirection(resultBundle: HandLandmarkerHelper.ResultBundle) {
+    private fun handlePointingDirection(resultBundle: HandLandmarkerHelper.ResultBundle): Boolean {
 
         val wholeFingerLandmark = resultBundle.results.first().landmarks().firstOrNull()
 
@@ -551,19 +555,19 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
 
             // Detect pointing direction using fingertips' landmarks
             // Get landmarks
-            val wrist = wholeFingerLandmark.get(0)
-            val thumbTip = wholeFingerLandmark.get(4)
-            val indexTip = wholeFingerLandmark.get(8)
-            val indexDIP = wholeFingerLandmark.get(7)
+            val wrist = wholeFingerLandmark[0]
+            val thumbTip = wholeFingerLandmark[4]
+            val indexTip = wholeFingerLandmark[8]
+            val indexDIP = wholeFingerLandmark[7]
 
-            val middleTip = wholeFingerLandmark.get(12)
-            val middlePIP = wholeFingerLandmark.get(10)
+            val middleTip = wholeFingerLandmark[12]
+            val middlePIP = wholeFingerLandmark[10]
 
-            val ringTip = wholeFingerLandmark.get(16)
-            val ringPIP = wholeFingerLandmark.get(14)
+            val ringTip = wholeFingerLandmark[16]
+            val ringPIP = wholeFingerLandmark[14]
 
-            val pinkyTip = wholeFingerLandmark.get(20)
-            val pinkyPIP = wholeFingerLandmark.get(18)
+            val pinkyTip = wholeFingerLandmark[20]
+            val pinkyPIP = wholeFingerLandmark[18]
 
             // Pointing Down
             if (thumbTip.y() < indexTip.y() &&
@@ -576,6 +580,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                 Log.d("GestureDetection", "Pointing Down")
                 trainingMenuBinding.angleShow.text = "向下指"
                 down()
+                return true
             }
             // Pointing Up
             else if (thumbTip.y() > indexTip.y() &&
@@ -588,6 +593,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                 Log.d("GestureDetection", "Pointing Up")
                 trainingMenuBinding.angleShow.text = "向上指"
                 up()
+                return true
             }
             // Pointing Left
             else if (indexTip.x() < thumbTip.x() &&
@@ -600,6 +606,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                 Log.d("GestureDetection", "Pointing Left")
                 trainingMenuBinding.angleShow.text = "向左指"
                 left()
+                return true
             }
             // Pointing Right
             else if (indexTip.x() > thumbTip.x() &&
@@ -612,7 +619,9 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                 Log.d("GestureDetection", "Pointing Right")
                 trainingMenuBinding.angleShow.text = "向右指"
                 right()
+                return true
             }
         }
+        return false
     }
 }
