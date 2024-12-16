@@ -8,6 +8,9 @@ import android.util.Log
 import androidx.activity.viewModels
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
+import com.chaquo.python.PyObject
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.example.yoga.Model.FinishTimer
 import com.example.yoga.Model.GlobalVariable
 import com.example.yoga.Model.KSecCountdownTimer
@@ -34,6 +37,11 @@ class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
     var totalScore = 0.0
     var totalTime = 0.0
     private var threadFlag : Boolean = true
+
+    // yogaMat function
+    private lateinit var python : Python
+    private lateinit var yogaMat : PyObject
+    private var yogaMatFunctionThread: Thread? = null
 
     fun lastpage(){
         Log.d("Main 訓練階段", "$mode")
@@ -104,6 +112,32 @@ class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
             lastpage()
         }
         timer30S.startTimer(this)
+
+        // python start
+        if (!Python.isStarted()) {
+            Python.start(AndroidPlatform(this))
+        }
+        
+        python = Python.getInstance()
+        // get yogaMat python module
+        yogaMat = python.getModule("heatmap")
+
+        // using yogaMat select and nextPage
+        yogaMatFunctionThread = Thread {
+            try {
+                Thread.sleep(1000)
+                if (yogaMat.callAttr("checkReturn").toBoolean()) {
+                    runOnUiThread {
+                        onTimerFinished()
+                    }
+                }
+                Thread.sleep(750)
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+        }
+
+        yogaMatFunctionThread?.start()
     }
 
     override fun onStart() {
