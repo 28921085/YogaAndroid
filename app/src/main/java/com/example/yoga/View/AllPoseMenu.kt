@@ -336,6 +336,7 @@ class AllPoseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener
         super.onPause()
         global.backgroundMusic.pause()
         println("pause music in AllPose onPause")
+        global.TTS.stop()
 
     }
     override fun onResume() {

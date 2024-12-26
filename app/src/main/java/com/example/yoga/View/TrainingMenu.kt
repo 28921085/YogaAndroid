@@ -403,6 +403,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
     }
     override fun onPause() {
         super.onPause()
+        global.TTS.stop()
         global.backgroundMusic.pause()
     }
     override fun onResume() {

@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         global.backgroundMusic.pause()
         println("pause music in AllPose onPause")
-
+        global.TTS.stop()
     }
     override fun onResume() {
         super.onResume()

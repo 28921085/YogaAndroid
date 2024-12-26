@@ -44,6 +44,7 @@ class GlobalVariable: Application(), DefaultLifecycleObserver {
     override fun onStop(owner: LifecycleOwner) {
         // 當應用程式進入背景時暫停音樂
         backgroundMusic.pause()
+        TTS.stop()
         println("pause music in GlobalVariable")
 
     }

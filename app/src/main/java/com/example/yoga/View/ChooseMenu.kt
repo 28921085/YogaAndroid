@@ -284,6 +284,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
     override fun onPause() {
         super.onPause()
         global.backgroundMusic.pause()
+        global.TTS.stop()
     }
     override fun onResume() {
         super.onResume()

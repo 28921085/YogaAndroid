@@ -106,6 +106,7 @@ class YogaResult : AppCompatActivity() {
     }
     override fun onPause() {
         super.onPause()
+        global.TTS.stop()
         global.backgroundMusic.pause()
     }
     override fun onResume() {

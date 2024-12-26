@@ -170,6 +170,8 @@ public class BluetoothActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         global.backgroundMusic.pause();
+        global.TTS.stop();
+
     }
 
     @Override
