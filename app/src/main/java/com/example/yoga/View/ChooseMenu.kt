@@ -277,8 +277,8 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch {
-            delay(800)
-            global.backgroundMusic.play()
+            delay(500)
+//            global.backgroundMusic.play()
         }
     }
     override fun onPause() {
@@ -293,8 +293,13 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
         super.onDestroy()
         //關掉相機
         backgroundExecutor.shutdown()
-        global.backgroundMusic.pause()
+//        global.backgroundMusic.pause()
     }
+
+//    override fun onStop() {
+//        super.onStop()
+//        global.backgroundMusic.pause()
+//    }
 
     override fun onError(error: String, errorCode: Int) {
         this.runOnUiThread {

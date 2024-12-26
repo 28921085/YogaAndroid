@@ -328,23 +328,35 @@ class AllPoseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener
         super.onStart()
         lifecycleScope.launch {
             delay(800)
-            global.backgroundMusic.play()
+//            global.backgroundMusic.play()
+//            println("play music in AllPose onStart")
         }
     }
     override fun onPause() {
         super.onPause()
         global.backgroundMusic.pause()
+        println("pause music in AllPose onPause")
+
     }
     override fun onResume() {
         super.onResume()
         global.backgroundMusic.play()
+        println("play music in AllPose onResume")
+
     }
     override fun onDestroy() {
         super.onDestroy()
         //關掉相機
         backgroundExecutor.shutdown()
-        global.backgroundMusic.pause()
+//        global.backgroundMusic.pause()
+//        println("pause music in AllPose onDestroy")
+
     }
+
+//    override fun onStop() {
+//        super.onStop()
+//        global.backgroundMusic.pause()
+//    }
 
     override fun onError(error: String, errorCode: Int) {
         this.runOnUiThread {

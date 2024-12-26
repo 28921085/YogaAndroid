@@ -42,21 +42,31 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch {
-            delay(800)
-            global.backgroundMusic.play()
+            delay(500)
+//            global.backgroundMusic.play()
         }
     }
+
     override fun onPause() {
         super.onPause()
         global.backgroundMusic.pause()
+        println("pause music in AllPose onPause")
+
     }
     override fun onResume() {
         super.onResume()
         global.backgroundMusic.play()
+        println("play music in AllPose onResume")
+
     }
 
     override fun onDestroy() {
         super.onDestroy()
+//        global.backgroundMusic.pause()
+    }
+
+    override fun onStop() {
+        super.onStop()
         global.backgroundMusic.pause()
     }
 }

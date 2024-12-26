@@ -140,14 +140,14 @@ class VideoGuide : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch {
-            delay(800)
-            global.backgroundMusic.play()
+            delay(500)
+//            global.backgroundMusic.play()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        global.backgroundMusic.pause()
+//        global.backgroundMusic.pause()
     }
     override fun onPause() {
         super.onPause()
@@ -160,4 +160,9 @@ class VideoGuide : AppCompatActivity() {
         global.backgroundMusic.play()
         videoGuideBinding.videoPlayer.start()
     }
+
+//    override fun onStop() {
+//        super.onStop()
+//        global.backgroundMusic.pause()
+//    }
 }

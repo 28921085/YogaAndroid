@@ -2,7 +2,11 @@ package com.example.yoga.Model
 
 import MyTTS
 import android.app.Application
-class GlobalVariable: Application() {
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
+
+class GlobalVariable: Application(), DefaultLifecycleObserver {
     lateinit var TTS:MyTTS
     lateinit var backgroundMusic:MyMediaPlayer
 
@@ -19,7 +23,7 @@ class GlobalVariable: Application() {
     }
 
     override fun onCreate() {
-        super.onCreate()
+        super<Application>.onCreate()
         instance = this
 
         TTS = MyTTS()
@@ -27,11 +31,29 @@ class GlobalVariable: Application() {
 
         backgroundMusic = MyMediaPlayer()
         backgroundMusic.init(applicationContext)
+
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+    }
+
+    override fun onStart(owner: LifecycleOwner) {
+        // 當應用程式進入前景時開始播放音樂
+        backgroundMusic.play()
+        println("play music in GlobalVariable")
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        // 當應用程式進入背景時暫停音樂
+        backgroundMusic.pause()
+        println("pause music in GlobalVariable")
+
     }
 
     override fun onTerminate() {
         super.onTerminate()
         backgroundMusic.stop()
         TTS.stop()
+
+        ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
+
     }
 }

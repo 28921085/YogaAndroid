@@ -143,8 +143,8 @@ class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch {
-            delay(800)
-            global.backgroundMusic.play()
+            delay(500)
+//            global.backgroundMusic.play()
         }
     }
     override fun onDestroy() {
@@ -152,7 +152,7 @@ class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
         timer30S.stopTimer()
         timerCurrent.handlerStop()
 
-        global.backgroundMusic.pause()
+//        global.backgroundMusic.pause()
         //關掉相機
         // 開這個會閃退，可能是只有 YogaMain 有開這個東西
 //        backgroundExecutor.shutdown()
@@ -166,4 +166,9 @@ class RestInterval : AppCompatActivity(), KSecCountdownTimer.TimerCallback {
         super.onResume()
         global.backgroundMusic.play()
     }
+
+//    override fun onStop() {
+//        super.onStop()
+//        global.backgroundMusic.pause()
+//    }
 }

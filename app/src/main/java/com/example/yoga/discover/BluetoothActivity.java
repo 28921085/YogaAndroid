@@ -152,7 +152,7 @@ public class BluetoothActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         unregisterReceiver(receiver);
-        global.backgroundMusic.pause();
+//        global.backgroundMusic.pause();
         super.onDestroy();
     }
     @Override
@@ -164,7 +164,7 @@ public class BluetoothActivity extends AppCompatActivity {
             public void run() {
                 global.backgroundMusic.play();
             }
-        }, 800);
+        }, 500);
     }
     @Override
     protected void onPause() {
@@ -177,4 +177,10 @@ public class BluetoothActivity extends AppCompatActivity {
         super.onResume();
         global.backgroundMusic.play();
     }
-}
+
+//     @Override
+//     protected void onStop() {
+//         super.onStop();
+//         global.backgroundMusic.pause();
+//     }
+ }

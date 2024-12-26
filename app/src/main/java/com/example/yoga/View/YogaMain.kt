@@ -595,8 +595,8 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch {
-            delay(800)
-            global.backgroundMusic.play()
+            delay(500)
+//            global.backgroundMusic.play()
         }
     }
     override fun onDestroy() {
@@ -604,7 +604,7 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
         timer30S.stopTimer()
         timerCurrent.handlerStop()
         global.TTS.stop()
-        global.backgroundMusic.pause()
+//        global.backgroundMusic.pause()
         //關掉相機
         backgroundExecutor.shutdown()
     }
@@ -625,4 +625,9 @@ class YogaMain : AppCompatActivity() , PoseLandmarkerHelper.LandmarkerListener,K
 //            global.backgroundMusic.play()
 //        }
     }
+
+//    override fun onStop() {
+//        super.onStop()
+//        global.backgroundMusic.pause()
+//    }
 }

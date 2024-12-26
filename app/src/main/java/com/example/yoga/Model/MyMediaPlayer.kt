@@ -19,7 +19,9 @@ class MyMediaPlayer {
         if(mediaPlayer.isPlaying)
             mediaPlayer.pause()
     }
-    fun stop(){mediaPlayer.stop()}
+    fun stop(){
+        mediaPlayer.stop()
+    }
 
 //    fun play() {
 //        if (!isPlaying()) {
