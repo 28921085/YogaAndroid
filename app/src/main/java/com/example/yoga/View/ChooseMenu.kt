@@ -1,5 +1,6 @@
 package com.example.yoga.View
 
+import android.util.DisplayMetrics
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -17,7 +18,6 @@ import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -64,9 +64,8 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
     private var functionNumber: Int = 0
 
     private var isExecuting = false
+    val displayMetrics = DisplayMetrics()
 
-    // 手部偵測status描述
-    private var angleshowtext:String = ""
 
     fun lastpage() {
         threadFlag = false // to stop thread
@@ -123,13 +122,6 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
             val aspectRatio: Rational = Rational(4, 3) // 指定4:3的寬高比
             val size: Size = Size(aspectRatio.numerator, aspectRatio.denominator)
 
-            val preview : Preview = Preview.Builder()
-                .setTargetResolution(size)
-                .build()
-                .also {
-                    it.setSurfaceProvider(chooseMenuBinding.camera.getSurfaceProvider())
-                }
-
             // 配置相机选择器
             val cameraSelector : CameraSelector =
                 CameraSelector.Builder().requireLensFacing(cameraFacing).build()
@@ -152,7 +144,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
             try {
                 cameraProvider.unbindAll()
                 camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview , imageAnalyzer
+                    this, cameraSelector , imageAnalyzer
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -260,10 +252,6 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
             println("!!! Menu Done !!!")
         }
         yogaMatFunctionThread?.start()
-
-        //縮小angle show 字體
-        chooseMenuBinding.angleShow.textSize = 12.0f
-        chooseMenuBinding.angleShow.postDelayed(updateRunnable,200)
     }
 
     private fun selectButton(button: Button) {
@@ -283,13 +271,6 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
             button.setBackgroundColor(Color.BLUE)
             button.setTextColor(Color.WHITE)
             button.setShadowLayer(0f, 0f, 0f, 0)
-        }
-    }
-
-    private val updateRunnable =  object : Runnable {
-        override fun run(){
-            chooseMenuBinding.angleShow.text = angleshowtext
-            chooseMenuBinding.angleShow.postDelayed(this, 200)
         }
     }
 
@@ -330,8 +311,8 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
             // Pass the results to GestureOverlayView
             chooseMenuBinding.gestureOverlay.setResults(
                 handLandmarkerResults = resultBundle.results.first(),
-                imageHeight = chooseMenuBinding.camera.height,
-                imageWidth = chooseMenuBinding.camera.width,
+                imageHeight = displayMetrics.heightPixels,
+                imageWidth = displayMetrics.widthPixels,
                 runningMode = RunningMode.LIVE_STREAM
             )
 
@@ -382,7 +363,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
                             thumbTIP.y() < indexTIP.y() -> { // 拇指的點位y離上方的距離較近，食指距離較遠
                         lifecycleScope.launch {
                             delay(1000)
-                            chooseMenuBinding.angleShow.text = "上一頁"
+                            Log.d("Detect Status", "上一頁")
                             if (threadFlag) {
                                 runOnUiThread {
                                     lastpage()
@@ -410,7 +391,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
                             thumbTIP.y() < indexTIP.y() -> { // 拇指的點位y離上方的距離較近，食指距離較遠
                         lifecycleScope.launch {
                             delay(1000)
-                            chooseMenuBinding.angleShow.text = "下一頁"
+                            Log.d("Detect Status", "下一頁")
                             if (threadFlag) {
                                 runOnUiThread {
                                     nextpage()
@@ -419,12 +400,12 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
                         }
                     }
                     else -> {
-                        "no hand detected on the screen".also { chooseMenuBinding.angleShow.text = it }
+                        Log.d("Detect Status", "no hand detected on the screen")
                     }
                 }
             }
         } else {
-            "no hand detected on the screen".also { chooseMenuBinding.angleShow.text = it }
+            Log.d("Detect Status", "no hand detected on the screen")
         }
     }
 
@@ -459,7 +440,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
                 pinkyTip.y() < pinkyPIP.y()) {
 
                 Log.d("GestureDetection", "Pointing Down")
-                chooseMenuBinding.angleShow.text = "沒有下的指令"
+                Log.d("Detect Status", "there‘s no pointing down function here")
             }
             // Pointing Up
             else if (thumbTip.y() > indexTip.y() &&
@@ -470,7 +451,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
                 pinkyTip.y() > pinkyPIP.y()) {
 
                 Log.d("GestureDetection", "Pointing Up")
-                chooseMenuBinding.angleShow.text = "沒有上的指令"
+                Log.d("Detect Status", "there’s no pointing up function here")
             }
             // Pointing Left
             else if (indexTip.x() < thumbTip.x() &&
@@ -481,7 +462,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
                 pinkyTip.x() > pinkyPIP.x()) {
 
                 Log.d("GestureDetection", "Pointing Left")
-                chooseMenuBinding.angleShow.text = "向左指"
+                Log.d("Detect Status", "向左指")
                 left()
                 return true
             }
@@ -494,7 +475,7 @@ class ChooseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener 
                 pinkyTip.x() < pinkyPIP.x()) {
 
                 Log.d("GestureDetection", "Pointing Right")
-                chooseMenuBinding.angleShow.text = "向右指"
+                Log.d("Detect Status", "向右指")
                 right()
                 return true
             }

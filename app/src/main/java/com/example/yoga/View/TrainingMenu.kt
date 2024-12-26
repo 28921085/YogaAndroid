@@ -1,5 +1,6 @@
 package com.example.yoga.View
 
+import android.util.DisplayMetrics
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -26,7 +27,6 @@ import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -77,9 +77,8 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
     private var totalTime = 0.0
 
     private var isExecuting = false
+    val displayMetrics = DisplayMetrics()
 
-    // 手部偵測status描述
-    private var angleshowtext:String = ""
 
     private val poseNames = arrayOf(
         "早晨喚醒流", "全身強化訓練", "平衡與穩定練習", "中心強化流", "柔軟與伸展",
@@ -245,13 +244,6 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
             val aspectRatio: Rational = Rational(4, 3) // 指定4:3的寬高比
             val size: Size = Size(aspectRatio.numerator, aspectRatio.denominator)
 
-            val preview : Preview = Preview.Builder()
-                .setTargetResolution(size)
-                .build()
-                .also {
-                    it.setSurfaceProvider(trainingMenuBinding.camera.getSurfaceProvider())
-                }
-
             // 配置相机选择器
             val cameraSelector : CameraSelector =
                 CameraSelector.Builder().requireLensFacing(cameraFacing).build()
@@ -274,7 +266,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
             try {
                 cameraProvider.unbindAll()
                 camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview , imageAnalyzer
+                    this, cameraSelector , imageAnalyzer
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -381,9 +373,6 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
 
         yogaMatFunctionThread?.start()
 
-        //縮小angle show 字體
-        trainingMenuBinding.angleShow.textSize = 12.0f
-        trainingMenuBinding.angleShow.postDelayed(updateRunnable,200)
     }
 
     private fun startTraining() {
@@ -403,13 +392,6 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
         }
         startActivity(intent)
         finish()
-    }
-
-    private val updateRunnable =  object : Runnable {
-        override fun run(){
-            trainingMenuBinding.angleShow.text = angleshowtext
-            trainingMenuBinding.angleShow.postDelayed(this, 200)
-        }
     }
 
     override fun onStart() {
@@ -449,8 +431,8 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
             // Pass the results to GestureOverlayView
             trainingMenuBinding.gestureOverlay.setResults(
                 handLandmarkerResults = resultBundle.results.first(),
-                imageHeight = trainingMenuBinding.camera.height,
-                imageWidth = trainingMenuBinding.camera.width,
+                imageHeight = displayMetrics.heightPixels,
+                imageWidth = displayMetrics.widthPixels,
                 runningMode = RunningMode.LIVE_STREAM
             )
 
@@ -501,7 +483,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                             thumbTIP.y() < indexTIP.y() -> { // 拇指的點位y離上方的距離較近，食指距離較遠
                         lifecycleScope.launch {
                             delay(1000)
-                            trainingMenuBinding.angleShow.text = "上一頁"
+                            Log.d("Detect Status", "上一頁")
                             if (threadFlag) {
                                 runOnUiThread {
                                     lastpage()
@@ -529,7 +511,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                             thumbTIP.y() < indexTIP.y() -> { // 拇指的點位y離上方的距離較近，食指距離較遠
                         lifecycleScope.launch {
                             delay(1000)
-                            trainingMenuBinding.angleShow.text = "下一頁"
+                            Log.d("Detect Status", "下一頁")
                             if (threadFlag) {
                                 runOnUiThread {
                                     startTraining()
@@ -538,12 +520,12 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                         }
                     }
                     else -> {
-                        "no hand detected on the screen".also { trainingMenuBinding.angleShow.text = it }
+                        Log.d("Detect Status", "no hand detected on the screen")
                     }
                 }
             }
         } else {
-            "no hand detected on the screen".also { trainingMenuBinding.angleShow.text = it }
+            Log.d("Detect Status", "no hand detected on the screen")
         }
     }
 
@@ -578,7 +560,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                 pinkyTip.y() < pinkyPIP.y()) {
 
                 Log.d("GestureDetection", "Pointing Down")
-                trainingMenuBinding.angleShow.text = "向下指"
+                Log.d("Detect Status", "向下指")
                 down()
                 return true
             }
@@ -591,7 +573,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                 pinkyTip.y() > pinkyPIP.y()) {
 
                 Log.d("GestureDetection", "Pointing Up")
-                trainingMenuBinding.angleShow.text = "向上指"
+                Log.d("Detect Status", "向上指")
                 up()
                 return true
             }
@@ -604,7 +586,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                 pinkyTip.x() > pinkyPIP.x()) {
 
                 Log.d("GestureDetection", "Pointing Left")
-                trainingMenuBinding.angleShow.text = "向左指"
+                Log.d("Detect Status", "向左指")
                 left()
                 return true
             }
@@ -617,7 +599,7 @@ class TrainingMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListene
                 pinkyTip.x() < pinkyPIP.x()) {
 
                 Log.d("GestureDetection", "Pointing Right")
-                trainingMenuBinding.angleShow.text = "向右指"
+                Log.d("Detect Status", "向右指")
                 right()
                 return true
             }
