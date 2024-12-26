@@ -1,4 +1,4 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  package com.example.yoga.discover;
+package com.example.yoga.discover;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -17,6 +17,12 @@ import com.chaquo.python.android.AndroidPlatform;
 import com.example.yoga.Model.GlobalVariable;
 import com.example.yoga.bluetooth.ChatActivity;
 import com.example.yoga.R;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -80,6 +86,19 @@ public class BluetoothActivity extends AppCompatActivity {
     public void onClickPass(View view){ // 沒有瑜珈墊
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra("remoteAddress", "0");
+        //save the address of connected yoga mat
+        try {
+            FileOutputStream fos = openFileOutput("bluetooth_address.txt", Context.MODE_PRIVATE);
+            fos.write("0".getBytes());
+            fos.close();
+            //read file
+            FileInputStream fis = openFileInput("bluetooth_address.txt");
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String str = br.readLine();
+            System.out.println("get address" + str);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         startActivity(intent);
         finish();
     }
@@ -106,6 +125,19 @@ public class BluetoothActivity extends AppCompatActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             String address = list.get(position).getAddress();
+            //save the address of connected yoga mat
+            try {
+                FileOutputStream fos = openFileOutput("bluetooth_address.txt", Context.MODE_PRIVATE);
+                fos.write(address.getBytes());
+                fos.close();
+                //read file
+                FileInputStream fis = openFileInput("bluetooth_address.txt");
+                BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+                String str = br.readLine();
+                System.out.println("get address" + str);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             startChat(address);
         }
     };

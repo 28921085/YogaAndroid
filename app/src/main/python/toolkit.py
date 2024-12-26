@@ -6,9 +6,44 @@ import AngleNodeDef
 
 from yogaFileGetter import get_image_path
 
+from com.chaquo.python import Python
+from android.content import Context
 
 MIN_DETECT_VISIBILITY = 0.7
 DISPLACEMENT_DISTANCE = 0.15
+
+def readBluetoothAddress():
+    """Read bluetooth address from file in app's internal storage
+    
+    Returns:
+        str: content of bluetooth_address.txt
+        None: if file not found or error occurs
+    """
+    try:
+        context = Python.getPlatform().getApplication()
+        fis = None
+        try:
+            fis = context.openFileInput("bluetooth_address.txt")
+            data = []
+            byte = fis.read()
+            while byte != -1:
+                data.append(byte)
+                byte = fis.read()
+            return bytes(data).decode('utf-8').strip()
+        finally:
+            if fis:
+                fis.close()
+                
+    except FileNotFoundError as e:
+        print(f"Bluetooth address file not found: {e}")
+        return None
+    except IOError as e:
+        print(f"IO error reading bluetooth address: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error reading bluetooth address: {e}")
+        return None
+
 def readSampleJsonFile(path):
     """read joint angle sample json file
 
@@ -299,7 +334,12 @@ def warriorIIPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/8.jpg" if tip_flag else imagePath
             elif abs((ankle_x-knee_x))>0.08:
                 roi[key] = False
-                tips = "請將重心往右移動移動，並且小腿與地面保持垂直" if tip_flag else tips
+                if readBluetoothAddress() == "0":
+                    tips = "請將身體下壓，右腳再彎曲一些" if tip_flag else tips
+                elif readBluetoothAddress() == None :
+                    tips = "發生錯誤" if tip_flag else tips
+                else:
+                    tips = "請將重心往右移動移動，並且小腿與地面保持垂直" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.LEFT_KNEE]
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/2.jpg" if tip_flag else imagePath
@@ -311,7 +351,12 @@ def warriorIIPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/2.jpg" if tip_flag else imagePath
             elif angle_dict[key]>150:
                 roi[key] = False
-                tips = "請將左腳再往後一些，並將臀部向下壓" if tip_flag else tips
+                if readBluetoothAddress() == "0":
+                    tips = "請將左腳再往後一些，並將臀部向下壓" if tip_flag else tips
+                elif readBluetoothAddress() == None :
+                    tips = "發生錯誤" if tip_flag else tips
+                else:
+                    tips = "請將重心往右移動移動，並且小腿與地面保持垂直" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi = point3d[AngleNodeDef.RIGHT_KNEE]
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
                 imagePath = f"{imageFolder}/2.jpg" if tip_flag else imagePath
@@ -2952,14 +2997,20 @@ def ChairposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
             elif angle_dict[key]<min_angle:
                 roi[key] = False
-                tips = "請勿將重心偏右" if tip_flag else tips#"右腿膝蓋彎曲角度太小" if tip_flag else tips
+                if readBluetoothAddress() == "0":
+                    tips = "右腿膝蓋彎曲角度太小" if tip_flag else tips
+                else:
+                    tips = "右腿膝蓋彎曲角度太小，請勿將重心偏右" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_KNEE]
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
                 print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.LEFT_KNEE])
                 imagePath = f"{imageFolder}/2.jpg" if tip_flag else imagePath
             else:
                 roi[key] = False
-                tips = "請勿將重心偏左" if tip_flag else tips#"右腿膝蓋彎曲角度太大" if tip_flag else tips
+                if readBluetoothAddress() == "0":
+                    tips = "右腿膝蓋彎曲角度太大" if tip_flag else tips
+                else:
+                    tips = "右腿膝蓋彎曲角度太大，請勿將重心偏左" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.LEFT_KNEE]
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
                 print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.LEFT_KNEE])
@@ -2975,14 +3026,18 @@ def ChairposeRule(roi, tips, sample_angle_dict, angle_dict, point3d):
                 imagePath = f"{imageFolder}/1.jpg" if tip_flag else imagePath
             elif angle_dict[key]<min_angle:
                 roi[key] = False
-                tips = "請勿將重心偏左" if tip_flag else tips#"左腿膝蓋彎曲角度太小" if tip_flag else tips
+                if readBluetoothAddress() == "0":
+                    tips = "左腿膝蓋彎曲角度太小" if tip_flag else tips
+                else: tips = "左腿膝蓋彎曲角度太小，請勿將重心偏左" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.RIGHT_KNEE]
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x-DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
                 print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.RIGHT_KNEE])
                 imagePath = f"{imageFolder}/4.jpg" if tip_flag else imagePath
             else:
                 roi[key] = False
-                tips = "請勿將重心偏右" if tip_flag else tips#"左腿膝蓋彎曲角度太大" if tip_flag else tips
+                if readBluetoothAddress() == "0":
+                    tips = "左腿膝蓋彎曲角度太大" if tip_flag else tips
+                else: tips = "左腿膝蓋彎曲角度太大，請勿將重心偏右" if tip_flag else tips
                 pointStart_x, pointStart_y, pointStart_z, pointStart_vi= point3d[AngleNodeDef.RIGHT_KNEE]
                 pointsOut = [pointStart_x, pointStart_y, pointStart_x+DISPLACEMENT_DISTANCE, pointStart_y] if tip_flag else pointsOut
                 print("toolkit: ",pointsOut, "Point3d:",point3d[AngleNodeDef.RIGHT_KNEE])
