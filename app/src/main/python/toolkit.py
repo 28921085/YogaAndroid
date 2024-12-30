@@ -1954,7 +1954,7 @@ def LocustPoseRule(roi, tips, sample_angle_dict, angle_dict, point3d):
        imagePath (str)
        pointsOut (list)
     """
-    imageFolder = "image/Locust Pose"
+    imageFolder = "image/Locust pose"
     imagePath = ""
     pointsOut = []# (a,b): a -> b
     for key, _ in roi.items():

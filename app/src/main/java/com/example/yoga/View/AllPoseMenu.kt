@@ -48,7 +48,7 @@ class AllPoseMenu : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener
     private val poseNames = arrayOf(
             "Tree Style", "Warrior2 Style", "Plank", "Reverse Plank", "Child's pose",
             "Seated Forward Bend", "Low Lunge", "Downward dog", "Pyramid pose", "Bridge pose",
-            "Mountain pose", "Triangle pose", "Locust Pose", "Cobra pose", "Half moon pose",
+            "Mountain pose", "Triangle pose", "Locust pose", "Cobra pose", "Half moon pose",
             "Boat pose", "Camel pose", "Pigeon pose", "Fish pose", "Chair pose"
     )
 

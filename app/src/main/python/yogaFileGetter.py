@@ -64,10 +64,10 @@ yogaFileDict = {
         "default_image_path" : "image/Triangle pose/1.jpg"
     },
 
-   "Locust Pose": {
+   "Locust pose": {
        "roi": AngleRegion.LOCUST,
        "angle_def": AngleNodeDef.LOCUST_ANGLE,
-       "default_image_path" : "image/Locust Pose/1.jpg" #預設瑜珈動作參考圖片
+       "default_image_path" : "image/Locust pose/1.jpg" #預設瑜珈動作參考圖片
    },
 
    "Cobra pose": {
